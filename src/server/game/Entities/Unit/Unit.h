@@ -350,8 +350,6 @@ class Guardian;
 class UnitAI;
 class Totem;
 class Transport;
-class Vehicle;
-class VehicleJoinEvent;
 class TransportBase;
 class SpellCastTargets;
 
@@ -413,7 +411,7 @@ enum TriggerCastFlags
     TRIGGERED_IGNORE_SET_FACING                     = 0x00000200,   //! Will not adjust facing to target (if any)
     TRIGGERED_IGNORE_SHAPESHIFT                     = 0x00000400,   //! Will ignore shapeshift checks
     TRIGGERED_IGNORE_CASTER_AURASTATE               = 0x00000800,   //! Will ignore caster aura states including combat requirements and death state
-    TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE   = 0x00002000,   //! Will ignore mounted/on vehicle restrictions
+    TRIGGERED_IGNORE_CASTER_MOUNTED					= 0x00002000,   //! Will ignore mounted
     TRIGGERED_IGNORE_CASTER_AURAS                   = 0x00010000,   //! Will ignore caster aura restrictions or requirements
     TRIGGERED_DISALLOW_PROC_EVENTS                  = 0x00020000,   //! Disallows proc events from triggered spell (default)
     TRIGGERED_DONT_REPORT_CAST_ERROR                = 0x00040000,   //! Will return SPELL_FAILED_DONT_REPORT in CheckCast functions
@@ -1331,8 +1329,7 @@ class Unit : public WorldObject
         bool IsPet() const      { return m_unitTypeMask & UNIT_MASK_PET; }
         bool IsHunterPet() const{ return m_unitTypeMask & UNIT_MASK_HUNTER_PET; }
         bool IsTotem() const    { return m_unitTypeMask & UNIT_MASK_TOTEM; }
-        bool IsVehicle() const  { return m_unitTypeMask & UNIT_MASK_VEHICLE; }
-
+        
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
         uint8 getLevelForTarget(WorldObject const* /*target*/) const { return getLevel(); }
         void SetLevel(uint8 lvl);

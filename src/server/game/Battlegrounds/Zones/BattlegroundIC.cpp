@@ -23,7 +23,6 @@
 #include "WorldPacket.h"
 #include "GameObject.h"
 #include "ObjectMgr.h"
-#include "Vehicle.h"
 #include "Transport.h"
 #include "WorldSession.h"
 
@@ -455,10 +454,6 @@ void BattlegroundIC::HandleKillUnit(Creature* unit, Player* killer)
         EndBattleground(ALLIANCE);
     }
 
-    //Achievement Mowed Down
-    // TO-DO: This should be done on the script of each vehicle of the BG.
-    if (unit->IsVehicle())
-        killer->CastSpell(killer, SPELL_DESTROYED_VEHICLE_ACHIEVEMENT, true);
 }
 
 void BattlegroundIC::HandleKillPlayer(Player* player, Player* killer)
