@@ -47,12 +47,6 @@ enum VehicleFlags
     VEHICLE_FLAG_ADJUST_AIM_POWER                = 0x00000800            // Lua_IsVehicleAimPowerAdjustable
 };
 
-enum VehicleSpells
-{
-    VEHICLE_SPELL_RIDE_HARDCODED                 = 46598,
-    VEHICLE_SPELL_PARACHUTE                      = 45472
-};
-
 struct PassengerInfo
 {
     uint64 Guid;

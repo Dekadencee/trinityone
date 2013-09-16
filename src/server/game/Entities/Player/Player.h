@@ -1552,8 +1552,7 @@ class Player : public Unit, public GridObject<Player>
         void SendOnCancelExpectedVehicleRideAura();
         void PetSpellInitialize();
         void CharmSpellInitialize();
-        void PossessSpellInitialize();
-        void VehicleSpellInitialize();
+        void PossessSpellInitialize();        
         void SendRemoveControlBar();
         bool HasSpell(uint32 spell) const;
         bool HasActiveSpell(uint32 spell) const;            // show in spellbook

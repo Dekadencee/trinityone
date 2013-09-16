@@ -703,22 +703,6 @@ ConditionList ConditionMgr::GetConditionsForSpellClickEvent(uint32 creatureId, u
     return cond;
 }
 
-ConditionList ConditionMgr::GetConditionsForVehicleSpell(uint32 creatureId, uint32 spellId)
-{
-    ConditionList cond;
-    CreatureSpellConditionContainer::const_iterator itr = VehicleSpellConditionStore.find(creatureId);
-    if (itr != VehicleSpellConditionStore.end())
-    {
-        ConditionTypeContainer::const_iterator i = (*itr).second.find(spellId);
-        if (i != (*itr).second.end())
-        {
-            cond = (*i).second;
-            TC_LOG_DEBUG(LOG_FILTER_CONDITIONSYS, "GetConditionsForVehicleSpell: found conditions for Vehicle entry %u spell %u", creatureId, spellId);
-        }
-    }
-    return cond;
-}
-
 ConditionList ConditionMgr::GetConditionsForSmartEvent(int32 entryOrGuid, uint32 eventId, uint32 sourceType)
 {
     ConditionList cond;
@@ -958,13 +942,6 @@ void ConditionMgr::LoadConditions(bool isReload)
                 case CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET:
                     valid = addToSpellImplicitTargetConditions(cond);
                     break;
-                case CONDITION_SOURCE_TYPE_VEHICLE_SPELL:
-                {
-                    VehicleSpellConditionStore[cond->SourceGroup][cond->SourceEntry].push_back(cond);
-                    valid = true;
-                    ++count;
-                    continue;   // do not add to m_AllocatedMemory to avoid double deleting
-                }
                 case CONDITION_SOURCE_TYPE_SMART_EVENT:
                 {
                     //! TODO: PAIR_32 ?
@@ -2041,19 +2018,6 @@ void ConditionMgr::Clean()
     }
 
     ConditionStore.clear();
-
-    for (CreatureSpellConditionContainer::iterator itr = VehicleSpellConditionStore.begin(); itr != VehicleSpellConditionStore.end(); ++itr)
-    {
-        for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-        {
-            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
-            it->second.clear();
-        }
-        itr->second.clear();
-    }
-
-    VehicleSpellConditionStore.clear();
 
     for (SmartEventConditionContainer::iterator itr = SmartEventConditionStore.begin(); itr != SmartEventConditionStore.end(); ++itr)
     {
