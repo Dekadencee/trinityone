@@ -4850,7 +4850,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // Check vehicle flags
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE))
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED))
     {
         SpellCastResult vehicleCheck = m_spellInfo->CheckVehicle(m_caster);
         if (vehicleCheck != SPELL_CAST_OK)
@@ -4964,7 +4964,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // not let players cast spells at mount (and let do it to creatures)
-    if (m_caster->IsMounted() && m_caster->GetTypeId() == TYPEID_PLAYER && !(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE) &&
+    if (m_caster->IsMounted() && m_caster->GetTypeId() == TYPEID_PLAYER && !(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED) &&
         !m_spellInfo->IsPassive() && !(m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_MOUNTED))
     {
         if (m_caster->IsInFlight())

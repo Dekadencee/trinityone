@@ -1450,7 +1450,7 @@ class spell_q11010_q11102_q11023_aggro_check : public SpellScriptLoader
                 if (Player* playerTarget = GetHitPlayer())
                     // Check if found player target is on fly mount or using flying form
                     if (playerTarget->HasAuraType(SPELL_AURA_FLY) || playerTarget->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
-                        playerTarget->CastSpell(playerTarget, SPELL_FLAK_CANNON_TRIGGER, TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE);
+                        playerTarget->CastSpell(playerTarget, SPELL_FLAK_CANNON_TRIGGER, TRIGGERED_IGNORE_CASTER_MOUNTED);
             }
 
             void Register() OVERRIDE
