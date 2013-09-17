@@ -3577,7 +3577,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
                 break;
-            case 72706: // Achievement Check (Valithria Dreamwalker)
             case 71357: // Order Whelp
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);   // 200yd
                 break;
