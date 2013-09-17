@@ -35,7 +35,6 @@
 #include "SkillDiscovery.h"
 #include "World.h"
 #include "AccountMgr.h"
-#include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
 #include "ObjectMgr.h"
 #include "ArenaTeamMgr.h"
@@ -1576,19 +1575,6 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Skill Fishing base level requirements...");
     sObjectMgr->LoadFishingBaseSkillLevel();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Achievements...");
-    sAchievementMgr->LoadAchievementReferenceList();
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Achievement Criteria Lists...");
-    sAchievementMgr->LoadAchievementCriteriaList();
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Achievement Criteria Data...");
-    sAchievementMgr->LoadAchievementCriteriaData();
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Achievement Rewards...");
-    sAchievementMgr->LoadRewards();
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Achievement Reward Locales...");
-    sAchievementMgr->LoadRewardLocales();
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Completed Achievements...");
-    sAchievementMgr->LoadCompletedAchievements();
 
     // Delete expired auctions before loading
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Deleting expired auctions...");
