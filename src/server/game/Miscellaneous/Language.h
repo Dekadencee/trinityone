@@ -766,7 +766,7 @@ enum TrinityStrings
     LANG_NEED_CHARACTER_NAME            = 807,
     LANG_PLAYER_NOT_EXIST_OR_OFFLINE    = 808,
     LANG_ACCOUNT_FOR_PLAYER_NOT_FOUND   = 809,
-    LANG_ACHIEVEMENT_EARNED             = 810,
+//  LANG_ACHIEVEMENT_EARNED             = 810, - can be reused
     LANG_GUILD_MASTER                   = 811,
     LANG_GUILD_OFFICER                  = 812,
     LANG_GUILD_VETERAN                  = 813,
@@ -1090,7 +1090,7 @@ enum TrinityStrings
     LANG_FLEE                           = 5030,
     LANG_NPCINFO_AIINFO                 = 5031,
     LANG_COMMAND_NO_BATTLEGROUND_FOUND  = 5032,
-    LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033,
+//  LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033, - can be reused
     LANG_COMMAND_NO_OUTDOOR_PVP_FORUND  = 5034,
     LANG_CALL_FOR_HELP                  = 5035,
     LANG_NPCINFO_EQUIPMENT              = 5036,
