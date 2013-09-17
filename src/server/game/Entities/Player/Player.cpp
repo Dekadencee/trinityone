@@ -572,6 +572,66 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         }
     }
 }
+void KillRewarder::_RewardGroup()
+{
+    if (_maxLevel)
+    {
+        if (_maxNotGrayMember)
+            // 3.1.1. Initialize initial XP amount based on maximum level of group member,
+            //        for whom victim is not gray.
+            _InitXP(_maxNotGrayMember);
+        // To avoid unnecessary calculations and calls,
+        // proceed only if XP is not ZERO or player is not on battleground
+        // (battleground rewards only XP, that's why).
+        if (!_isBattleGround || _xp)
+        {
+            const bool isDungeon = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsDungeon();
+            if (!_isBattleGround)
+            {
+                // 3.1.2. Alter group rate if group is in raid (not for battlegrounds).
+                const bool isRaid = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsRaid() && _group->isRaidGroup();
+                _groupRate = Trinity::XP::xp_in_group_rate(_count, isRaid);
+            }
+
+            // 3.1.3. Reward each group member (even dead or corpse) within reward distance.
+            for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (Player* member = itr->GetSource())
+                {
+                    if (member->IsAtGroupRewardDistance(_victim))
+                       _RewardPlayer(member, isDungeon);
+                    
+                }
+            }
+        }
+    }
+}
+
+void KillRewarder::Reward()
+{
+    // 3. Reward killer (and group, if necessary).
+    if (_group)
+        // 3.1. If killer is in group, reward group.
+        _RewardGroup();
+    else
+    {
+        // 3.2. Reward single killer (not group case).
+        // 3.2.1. Initialize initial XP amount based on killer's level.
+        _InitXP(_killer);
+        // To avoid unnecessary calculations and calls,
+        // proceed only if XP is not ZERO or player is not on battleground
+        // (battleground rewards only XP, that's why).
+        if (!_isBattleGround || _xp)
+            // 3.2.2. Reward killer.
+            _RewardPlayer(_killer, false);
+    }
+
+    // 5. Credit instance encounter.
+    if (Creature* victim = _victim->ToCreature())
+        if (victim->IsDungeonBoss())
+            if (InstanceScript* instance = _victim->GetInstanceScript())
+                instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
+}
 
 
 // == Player ====================================================
