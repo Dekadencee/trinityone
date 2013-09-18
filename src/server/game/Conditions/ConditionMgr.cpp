@@ -244,9 +244,6 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
                         case RELATION_OWNED_BY:
                             condMeets = unit->GetOwnerGUID() == toUnit->GetGUID();
                             break;
-                        case RELATION_PASSENGER_OF:
-                            condMeets = unit->IsOnVehicle(toUnit);
-                            break;
                         case RELATION_CREATED_BY:
                             condMeets = unit->GetCreatorGUID() == toUnit->GetGUID();
                             break;
@@ -501,7 +498,6 @@ uint32 Condition::GetMaxAvailableConditionTargets()
     {
         case CONDITION_SOURCE_TYPE_SPELL:
         case CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET:
-        case CONDITION_SOURCE_TYPE_CREATURE_TEMPLATE_VEHICLE:        
         case CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
@@ -1398,15 +1394,6 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
             // all effects were removed, no need to add the condition at all
             if (!cond->SourceGroup)
                 return false;
-            break;
-        }
-        case CONDITION_SOURCE_TYPE_CREATURE_TEMPLATE_VEHICLE:
-        {
-            if (!sObjectMgr->GetCreatureTemplate(cond->SourceEntry))
-            {
-                TC_LOG_ERROR(LOG_FILTER_SQL, "SourceEntry %u in `condition` table, does not exist in `creature_template`, ignoring.", cond->SourceEntry);
-                return false;
-            }
             break;
         }
         case CONDITION_SOURCE_TYPE_SPELL:
