@@ -1544,9 +1544,6 @@ void GameObject::Use(Unit* user)
                 if (!bg)
                     return;
 
-                if (player->GetVehicle())
-                    return;
-
                 player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                 player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
                 // BG flag click
@@ -1586,9 +1583,6 @@ void GameObject::Use(Unit* user)
                 // in battleground check
                 Battleground* bg = player->GetBattleground();
                 if (!bg)
-                    return;
-
-                if (player->GetVehicle())
                     return;
 
                 player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);

@@ -20,13 +20,12 @@
 #define TRANSPORTS_H
 
 #include "GameObject.h"
-#include "VehicleDefines.h"
 
 #include <map>
 #include <set>
 #include <string>
 
-class Transport : public GameObject, public TransportBase
+class Transport : public GameObject
 {
     public:
         Transport(uint32 period, uint32 script);

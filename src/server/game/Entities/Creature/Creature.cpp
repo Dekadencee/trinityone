@@ -337,7 +337,7 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
     SetObjectScale(cinfo->scale);
 
-    SetFloatValue(UNIT_FIELD_HOVERHEIGHT, cinfo->HoverHeight);
+//  SetFloatValue(UNIT_FIELD_HOVERHEIGHT, cinfo->HoverHeight); -- need to fix this for 2.4.3
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -767,7 +767,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
     if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
     {
-        z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+//        z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT); - Need to fix this for 2.4.3
 
         //! Relocate again with updated Z coord
         Relocate(x, y, z, ang);
@@ -1134,16 +1134,10 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint3
 
     SetOriginalEntry(Entry);
 
-    if (!vehId)
-        vehId = cinfo->VehicleId;
-
     Object::_Create(guidlow, Entry, vehId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT);
 
     if (!UpdateEntry(Entry, team, data))
         return false;
-
-    if (vehId)
-        CreateVehicleKit(vehId, Entry);
 
     return true;
 }

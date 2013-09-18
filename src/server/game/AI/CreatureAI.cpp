@@ -146,8 +146,6 @@ void CreatureAI::EnterEvadeMode()
 
     TC_LOG_DEBUG(LOG_FILTER_UNITS, "Creature %u enters evade mode.", me->GetEntry());
 
-    if (!me->GetVehicle()) // otherwise me will be in evade mode forever
-    {
         if (Unit* owner = me->GetCharmerOrOwner())
         {
             me->GetMotionMaster()->Clear(false);
@@ -160,7 +158,6 @@ void CreatureAI::EnterEvadeMode()
             me->AddUnitState(UNIT_STATE_EVADE);
             me->GetMotionMaster()->MoveTargetedHome();
         }
-    }
 
     Reset();
 
