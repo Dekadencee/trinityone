@@ -20,7 +20,6 @@
 #include "ObjectMgr.h"
 #include "SpellInfo.h"
 #include "DBCStores.h"
-#include "AchievementMgr.h"
 
 // Supported shift-links (client generated and server side)
 // |color|Hachievement:achievement_id:player_guid:0:0:0:0:0:0:0:0|h[name]|h|r
@@ -329,63 +328,7 @@ bool SpellChatLink::ValidateName(char* buffer, const char* context)
 
 // |color|Hachievement:achievement_id:player_guid:0:0:0:0:0:0:0:0|h[name]|h|r
 // |cffffff00|Hachievement:546:0000000000000001:0:0:0:-1:0:0:0:0|h[Safe Deposit]|h|r
-bool AchievementChatLink::Initialize(std::istringstream& iss)
-{
-    if (_color != CHAT_LINK_COLOR_ACHIEVEMENT)
-        return false;
-    // Read achievemnt Id
-    uint32 achievementId = 0;
-    if (!ReadUInt32(iss, achievementId))
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): sequence finished unexpectedly while reading achievement entry", iss.str().c_str());
-        return false;
-    }
-    // Validate achievement
-    _achievement = sAchievementMgr->GetAchievement(achievementId);
-    if (!_achievement)
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): got invalid achivement id %u in |achievement command", iss.str().c_str(), achievementId);
-        return false;
-    }
-    // Check delimiter
-    if (!CheckDelimiter(iss, DELIMITER, "achievement"))
-        return false;
-    // Read HEX
-    if (!ReadHex(iss, _guid, 0))
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): invalid hexadecimal number while reading char's guid", iss.str().c_str());
-        return false;
-    }
-    // Skip progress
-    const uint8 propsCount = 8;
-    for (uint8 index = 0; index < propsCount; ++index)
-    {
-        if (!CheckDelimiter(iss, DELIMITER, "achievement"))
-            return false;
 
-        if (!ReadUInt32(iss, _data[index]))
-        {
-            TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): sequence finished unexpectedly while reading achievement property (%u)", iss.str().c_str(), index);
-            return false;
-        }
-    }
-    return true;
-}
-
-bool AchievementChatLink::ValidateName(char* buffer, const char* context)
-{
-    ChatLink::ValidateName(buffer, context);
-
-    for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
-        if (*_achievement->name[i] && strcmp(_achievement->name[i], buffer) == 0)
-            return true;
-
-    TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): linked achievement (id: %u) name wasn't found in any localization", context, _achievement->ID);
-    return false;
-}
-
-// |color|Htrade:spell_id:cur_value:max_value:player_guid:base64_data|h[name]|h|r
-// |cffffd000|Htrade:4037:1:150:1:6AAAAAAAAAAAAAAAAAAAAAAOAADAAAAAAAAAAAAAAAAIAAAAAAAAA|h[Engineering]|h|r
 bool TradeChatLink::Initialize(std::istringstream& iss)
 {
     if (_color != CHAT_LINK_COLOR_TRADE)
@@ -499,42 +442,6 @@ bool EnchantmentChatLink::Initialize(std::istringstream& iss)
 
 // |color|Hglyph:glyph_slot_id:glyph_prop_id|h[%s]|h|r
 // |cff66bbff|Hglyph:21:762|h[Glyph of Bladestorm]|h|r
-bool GlyphChatLink::Initialize(std::istringstream& iss)
-{
-    if (_color != CHAT_LINK_COLOR_GLYPH)
-        return false;
-    // Slot
-    if (!ReadUInt32(iss, _slotId))
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): sequence finished unexpectedly while reading slot id", iss.str().c_str());
-        return false;
-    }
-    // Check delimiter
-    if (!CheckDelimiter(iss, DELIMITER, "glyph"))
-        return false;
-    // Glyph Id
-    uint32 glyphId = 0;
-    if (!ReadUInt32(iss, glyphId))
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): sequence finished unexpectedly while reading glyph entry", iss.str().c_str());
-        return false;
-    }
-    // Validate glyph
-    _glyph = sGlyphPropertiesStore.LookupEntry(glyphId);
-    if (!_glyph)
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): got invalid glyph id %u in |glyph command", iss.str().c_str(), glyphId);
-        return false;
-    }
-    // Validate glyph's spell
-    _spell = sSpellMgr->GetSpellInfo(_glyph->SpellId);
-    if (!_spell)
-    {
-        TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): got invalid spell id %u in |glyph command", iss.str().c_str(), _glyph->SpellId);
-        return false;
-    }
-    return true;
-}
 
 LinkExtractor::LinkExtractor(const char* msg) : _iss(msg)
 {
