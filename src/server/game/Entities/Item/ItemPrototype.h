@@ -723,9 +723,6 @@ struct ItemTemplate
             case ITEM_QUALITY_NORMAL:
             case ITEM_QUALITY_UNCOMMON:
             case ITEM_QUALITY_ARTIFACT:
-            case ITEM_QUALITY_HEIRLOOM:
-                itemLevel -= 13; // leaving this as a separate statement since we do not know the real behavior in this case
-                break;
             case ITEM_QUALITY_RARE:
                 itemLevel -= 13;
                 break;

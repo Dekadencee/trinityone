@@ -253,8 +253,6 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
     0xff0070dd,        //BLUE
     0xffa335ee,        //PURPLE
     0xffff8000,        //ORANGE
-    0xffe6cc80,        //LIGHT YELLOW
-    0xffe6cc80         //LIGHT YELLOW
 };
 
 // ***********************************
