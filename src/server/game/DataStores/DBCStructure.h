@@ -1363,7 +1363,7 @@ struct PvPDifficultyEntry
     uint32      difficulty;                                 // 5
 
     // helpers
-//  BattlegroundBracketId GetBracketId() const { return BattlegroundBracketId(bracketId); }
+    BattlegroundBracketId GetBracketId() const { return BattlegroundBracketId(bracketId); }
 };
 
 struct QuestSortEntry
