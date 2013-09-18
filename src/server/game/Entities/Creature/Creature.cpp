@@ -47,7 +47,6 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Util.h"
-#include "Vehicle.h"
 #include "WaypointMovementGenerator.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -555,10 +554,7 @@ void Creature::Update(uint32 diff)
                 RegenerateHealth();
 
             if (getPowerType() == POWER_ENERGY)
-            {
-                if (!IsVehicle() || GetVehicleKit()->GetVehicleInfo()->m_powerType != POWER_PYRITE)
-                    Regenerate(POWER_ENERGY);
-            }
+                   Regenerate(POWER_ENERGY);
             else
                 RegenerateMana();
 
@@ -878,7 +874,7 @@ void Creature::SetLootRecipient(Unit* unit)
         return;
     }
 
-    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+    if (unit->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -1233,7 +1229,7 @@ void Creature::LoadEquipment(int8 id, bool force /*= true*/)
         if (force)
         {
             for (uint8 i = 0; i < MAX_EQUIPMENT_ITEMS; ++i)
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, 0);
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, 0);
             m_equipmentId = 0;
         }
         return;
@@ -1245,7 +1241,7 @@ void Creature::LoadEquipment(int8 id, bool force /*= true*/)
 
     m_equipmentId = id;
     for (uint8 i = 0; i < 3; ++i)
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->ItemEntry[i]);
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, einfo->ItemEntry[i]);
 }
 
 bool Creature::hasQuest(uint32 quest_id) const
@@ -1878,8 +1874,7 @@ bool Creature::_IsTargetAcceptable(const Unit* target) const
 
     // if the target cannot be attacked, the target is not acceptable
     if (IsFriendlyTo(target)
-        || !target->isTargetableForAttack(false)
-        || (m_vehicle && (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))))
+        || !target->isTargetableForAttack(false))
         return false;
 
     if (target->HasUnitState(UNIT_STATE_DIED))
@@ -2392,8 +2387,6 @@ void Creature::SetPosition(float x, float y, float z, float o)
     }
 
     GetMap()->CreatureRelocation(ToCreature(), x, y, z, o);
-    if (IsVehicle())
-        GetVehicleKit()->RelocatePassengers();
 }
 
 bool Creature::IsDungeonBoss() const

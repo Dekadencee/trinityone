@@ -202,8 +202,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+0, rotation0);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+1, rotation1);
+    SetFloatValue(GAMEOBJECT_ROTATION+0, rotation0);
+    SetFloatValue(GAMEOBJECT_ROTATION+1, rotation1);
 
     UpdateRotationFields(rotation2, rotation3);              // GAMEOBJECT_FACING, GAMEOBJECT_ROTATION, GAMEOBJECT_PARENTROTATION+2/3
 
@@ -688,10 +688,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.rotation0 = GetFloatValue(GAMEOBJECT_PARENTROTATION+0);
-    data.rotation1 = GetFloatValue(GAMEOBJECT_PARENTROTATION+1);
-    data.rotation2 = GetFloatValue(GAMEOBJECT_PARENTROTATION+2);
-    data.rotation3 = GetFloatValue(GAMEOBJECT_PARENTROTATION+3);
+    data.rotation0 = GetFloatValue(GAMEOBJECT_ROTATION+0);
+    data.rotation1 = GetFloatValue(GAMEOBJECT_ROTATION+1);
+    data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
+    data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
@@ -717,10 +717,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     stmt->setFloat(index++, GetPositionY());
     stmt->setFloat(index++, GetPositionZ());
     stmt->setFloat(index++, GetOrientation());
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+1));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+2));
-    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+3));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_ROTATION));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_ROTATION+1));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_ROTATION+2));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_ROTATION+3));
     stmt->setInt32(index++, int32(m_respawnDelayTime));
     stmt->setUInt8(index++, GetGoAnimProgress());
     stmt->setUInt8(index++, uint8(GetGoState()));
@@ -1045,15 +1045,15 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
     m_cooldownTime = time(NULL) + time_to_restore;
 }
 
-void GameObject::SetGoArtKit(uint8 kit)
+void GameObject::SetGoArtKit(uint32 kit)
 {
-    SetByteValue(GAMEOBJECT_BYTES_1, 2, kit);
+    SetUInt32Value(GAMEOBJECT_ARTKIT, kit);
     GameObjectData* data = const_cast<GameObjectData*>(sObjectMgr->GetGOData(m_DBTableGuid));
     if (data)
         data->artKit = kit;
 }
 
-void GameObject::SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid)
+void GameObject::SetGoArtKit(uint32 artkit, GameObject* go, uint32 lowguid)
 {
     const GameObjectData* data = NULL;
     if (go)
@@ -1797,8 +1797,8 @@ void GameObject::UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3
         rotation3 = (float)f_rot2;
     }
 
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+2, rotation2);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION+3, rotation3);
+    SetFloatValue(GAMEOBJECT_ROTATION+2, rotation2);
+    SetFloatValue(GAMEOBJECT_ROTATION+3, rotation3);
 }
 
 void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, uint32 spellId /*= 0*/)
@@ -1966,7 +1966,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
 void GameObject::SetGoState(GOState state)
 {
-    SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    SetUInt32Value(GAMEOBJECT_STATE, state);
     sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model)
     {
@@ -2046,7 +2046,7 @@ void GameObject::SetLootRecipient(Unit* unit)
         return;
     }
 
-    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+    if (unit->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -2099,7 +2099,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
         {
             updateMask.SetBit(index);
 
-            if (index == GAMEOBJECT_DYNAMIC)
+            if (index == GAMEOBJECT_DYN_FLAGS)
             {
                 uint16 dynFlags = 0;
                 switch (GetGoType())

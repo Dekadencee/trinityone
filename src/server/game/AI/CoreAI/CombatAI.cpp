@@ -19,7 +19,6 @@
 #include "CombatAI.h"
 #include "SpellMgr.h"
 #include "SpellInfo.h"
-#include "Vehicle.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 

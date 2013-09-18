@@ -36,7 +36,6 @@
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include <ace/Singleton.h>
-#include "VehicleDefines.h"
 #include <string>
 #include <map>
 #include <limits>
@@ -841,8 +840,6 @@ class ObjectMgr
             return NULL;
         }
 
-        VehicleAccessoryList const* GetVehicleAccessoryList(Vehicle* veh) const;
-
         DungeonEncounterList const* GetDungeonEncounterList(uint32 mapId, Difficulty difficulty)
         {
             UNORDERED_MAP<uint32, DungeonEncounterList>::const_iterator itr = _dungeonEncounterStore.find(MAKE_PAIR32(mapId, difficulty));
@@ -1296,8 +1293,6 @@ class ObjectMgr
 
         SpellScriptsContainer _spellScriptsStore;
 
-        VehicleAccessoryContainer _vehicleTemplateAccessoryStore;
-        VehicleAccessoryContainer _vehicleAccessoryStore;
 
         LocaleConstant DBCLocaleIndex;
 

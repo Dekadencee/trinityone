@@ -709,7 +709,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void getFishLoot(Loot* loot, Player* loot_owner);
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetUInt32Value(GAMEOBJECT_TYPE_ID)); }
         void SetGoType(GameobjectTypes type) { SetUInt32Value(GAMEOBJECT_TYPE_ID, type); }
-        uint32 GetGoState() const { return GOState(GetUInt32Value(GAMEOBJECT_STATE)); }
+        GOState  GetGoState() const { return GOState(GetUInt32Value(GAMEOBJECT_STATE)); }
         void SetGoState(GOState state);
         uint32 GetGoArtKit() const { return GetUInt32Value(GAMEOBJECT_ARTKIT); }
         void SetGoArtKit(uint32 artkit);
