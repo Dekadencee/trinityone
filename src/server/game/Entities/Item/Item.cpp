@@ -277,7 +277,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
         SetSpellCharges(i, itemProto->Spells[i].SpellCharges);
 
     SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Duration);
-    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0);
+//    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0); - 2.4.3?
     return true;
 }
 
@@ -347,7 +347,7 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setInt16 (++index, GetItemRandomPropertyId());
             stmt->setUInt16(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
-            stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
+//            stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)); - 2.4.3?
             stmt->setString(++index, m_text);
             stmt->setUInt32(++index, guid);
 
@@ -444,7 +444,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
     }
 
     std::string enchants = fields[6].GetString();
-    _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
+//    _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET); - 2.4.3?
     SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[7].GetInt16());
     // recalculate suffix factor
     if (GetItemRandomPropertyId() < 0)
@@ -460,7 +460,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         need_save = true;
     }
 
-    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[9].GetUInt32());
+//    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[9].GetUInt32()); - 2.4.3?
     SetText(fields[10].GetString());
 
     if (need_save)                                           // normal item changed state set not work at loading
@@ -893,10 +893,11 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
             owner->GetSession()->SendEnchantmentLog(GetOwnerGUID(), caster, GetEntry(), id);
     }
 
-    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
+/*    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, charges);
     SetState(ITEM_CHANGED, owner);
+*/ // 2.4.3?
 }
 
 void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player* owner)
@@ -904,7 +905,7 @@ void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player*
     if (GetEnchantmentDuration(slot) == duration)
         return;
 
-    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);
+//    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration); - 2.4.3?
     SetState(ITEM_CHANGED, owner);
     // Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
 }
@@ -914,7 +915,7 @@ void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
     if (GetEnchantmentCharges(slot) == charges)
         return;
 
-    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, charges);
+//    SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET, charges); - 2.4.3?
     SetState(ITEM_CHANGED, GetOwner());
 }
 
@@ -924,7 +925,7 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
         return;
 
     for (uint8 x = 0; x < MAX_ITEM_ENCHANTMENT_EFFECTS; ++x)
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + x, 0);
+//        SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + x, 0); - 2.4.3?
     SetState(ITEM_CHANGED, GetOwner());
 }
 
@@ -1163,7 +1164,8 @@ void Item::UpdatePlayedTime(Player* owner)
         based on the time elapsed since the last update hereof.
     */
     // Get current played time
-    uint32 current_playtime = GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME);
+//    uint32 current_playtime = GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME); - 2.4.3?
+    uint32 current_playtime = time(NULL);
     // Calculate time elapsed since last played time update
     time_t curtime = time(NULL);
     uint32 elapsed = uint32(curtime - m_lastPlayedTimeUpdate);
@@ -1173,7 +1175,7 @@ void Item::UpdatePlayedTime(Player* owner)
     {
         // No? Proceed.
         // Update the data field
-        SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, new_playtime);
+//        SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, new_playtime); - 2.4.3?
         // Flag as changed to get saved to DB
         SetState(ITEM_CHANGED, owner);
         // Speaks for itself
@@ -1188,7 +1190,8 @@ uint32 Item::GetPlayedTime()
 {
     time_t curtime = time(NULL);
     uint32 elapsed = uint32(curtime - m_lastPlayedTimeUpdate);
-    return GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + elapsed;
+//    return GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + elapsed; - 2.4.3?
+    return curtime + elapsed;
 }
 
 bool Item::IsRefundExpired()
@@ -1218,12 +1221,12 @@ void Item::ClearSoulboundTradeable(Player* currentOwner)
 bool Item::CheckSoulboundTradeExpire()
 {
     // called from owner's update - GetOwner() MUST be valid
-    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2*HOUR < GetOwner()->GetTotalPlayedTime())
+/*    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2*HOUR < GetOwner()->GetTotalPlayedTime())
     {
         ClearSoulboundTradeable(GetOwner());
         return true; // remove from tradeable list
     }
-
+*/ // 2.4.3?
     return false;
 }
 
