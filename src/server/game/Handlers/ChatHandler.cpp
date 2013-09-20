@@ -139,7 +139,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 switch (type)
                 {
                     case CHAT_MSG_PARTY:
-                    case CHAT_MSG_PARTY_LEADER:
                     case CHAT_MSG_RAID:
                     case CHAT_MSG_RAID_LEADER:
                     case CHAT_MSG_RAID_WARNING:
@@ -184,7 +183,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_EMOTE:
         case CHAT_MSG_YELL:
         case CHAT_MSG_PARTY:
-        case CHAT_MSG_PARTY_LEADER:
         case CHAT_MSG_GUILD:
         case CHAT_MSG_OFFICER:
         case CHAT_MSG_RAID:
@@ -296,7 +294,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             GetPlayer()->Whisper(msg, lang, receiver->GetGUID());
         } break;
         case CHAT_MSG_PARTY:
-        case CHAT_MSG_PARTY_LEADER:
         {
             // if player is in battleground, he cannot say to battleground members by /p
             Group* group = GetPlayer()->GetOriginalGroup();
@@ -307,7 +304,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                     return;
             }
 
-            if (type == CHAT_MSG_PARTY_LEADER && !group->IsLeader(_player->GetGUID()))
+            if (!group->IsLeader(_player->GetGUID()))
                 return;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);

@@ -23,7 +23,6 @@ Category: commandscripts
 EndScriptData */
 
 #include "DisableMgr.h"
-#include "AchievementMgr.h"
 #include "Chat.h"
 #include "Language.h"
 #include "ObjectMgr.h"
@@ -45,7 +44,6 @@ public:
             { "quest",                RBAC_PERM_COMMAND_DISABLE_REMOVE_QUEST,                true, &HandleRemoveDisableQuestCommand,               "", NULL },
             { "map",                  RBAC_PERM_COMMAND_DISABLE_REMOVE_MAP,                  true, &HandleRemoveDisableMapCommand,                 "", NULL },
             { "battleground",         RBAC_PERM_COMMAND_DISABLE_REMOVE_BATTLEGROUND,         true, &HandleRemoveDisableBattlegroundCommand,        "", NULL },
-            { "achievement_criteria", RBAC_PERM_COMMAND_DISABLE_REMOVE_ACHIEVEMENT_CRITERIA, true, &HandleRemoveDisableAchievementCriteriaCommand, "", NULL },
             { "outdoorpvp",           RBAC_PERM_COMMAND_DISABLE_REMOVE_OUTDOORPVP,           true, &HandleRemoveDisableOutdoorPvPCommand,          "", NULL },
             { "vmap",                 RBAC_PERM_COMMAND_DISABLE_REMOVE_VMAP,                 true, &HandleRemoveDisableVmapCommand,                "", NULL },
             { "mmap",                 RBAC_PERM_COMMAND_DISABLE_REMOVE_MMAP,                 true, &HandleRemoveDisableMMapCommand,                "", NULL },
@@ -57,7 +55,6 @@ public:
             { "quest",                RBAC_PERM_COMMAND_DISABLE_ADD_QUEST,                true, &HandleAddDisableQuestCommand,                  "", NULL },
             { "map",                  RBAC_PERM_COMMAND_DISABLE_ADD_MAP,                  true, &HandleAddDisableMapCommand,                    "", NULL },
             { "battleground",         RBAC_PERM_COMMAND_DISABLE_ADD_BATTLEGROUND,         true, &HandleAddDisableBattlegroundCommand,           "", NULL },
-            { "achievement_criteria", RBAC_PERM_COMMAND_DISABLE_ADD_ACHIEVEMENT_CRITERIA, true, &HandleAddDisableAchievementCriteriaCommand,    "", NULL },
             { "outdoorpvp",           RBAC_PERM_COMMAND_DISABLE_ADD_OUTDOORPVP,           true, &HandleAddDisableOutdoorPvPCommand,             "", NULL },
             { "vmap",                 RBAC_PERM_COMMAND_DISABLE_ADD_VMAP,                 true, &HandleAddDisableVmapCommand,                   "", NULL },
             { "mmap",                 RBAC_PERM_COMMAND_DISABLE_ADD_MMAP,                 true, &HandleAddDisableMMapCommand,                   "", NULL },
@@ -139,17 +136,6 @@ public:
                     return false;
                 }
                 disableTypeStr = "battleground";
-                break;
-            }
-            case DISABLE_TYPE_ACHIEVEMENT_CRITERIA:
-            {
-                if (!sAchievementMgr->GetAchievementCriteria(entry))
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND);
-                    handler->SetSentErrorMessage(true);
-                    return false;
-                }
-                disableTypeStr = "achievement criteria";
                 break;
             }
             case DISABLE_TYPE_OUTDOORPVP:

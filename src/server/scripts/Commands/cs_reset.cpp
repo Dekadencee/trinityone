@@ -22,7 +22,6 @@ Comment: All reset related commands
 Category: commandscripts
 EndScriptData */
 
-#include "AchievementMgr.h"
 #include "Chat.h"
 #include "Language.h"
 #include "ObjectAccessor.h"
@@ -39,7 +38,6 @@ public:
     {
         static ChatCommand resetCommandTable[] =
         {
-            { "achievements", RBAC_PERM_COMMAND_RESET_ACHIEVEMENTS, true, &HandleResetAchievementsCommand, "", NULL },
             { "honor",        RBAC_PERM_COMMAND_RESET_HONOR,        true, &HandleResetHonorCommand,        "", NULL },
             { "level",        RBAC_PERM_COMMAND_RESET_LEVEL,        true, &HandleResetLevelCommand,        "", NULL },
             { "spells",       RBAC_PERM_COMMAND_RESET_SPELLS,       true, &HandleResetSpellsCommand,       "", NULL },
@@ -54,21 +52,6 @@ public:
             { NULL,    0,                      false, NULL, "", NULL }
         };
         return commandTable;
-    }
-
-    static bool HandleResetAchievementsCommand(ChatHandler* handler, char const* args)
-    {
-        Player* target;
-        uint64 targetGuid;
-        if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid))
-            return false;
-
-        if (target)
-            target->ResetAchievements();
-        else
-            AchievementMgr::DeleteFromDB(GUID_LOPART(targetGuid));
-
-        return true;
     }
 
     static bool HandleResetHonorCommand(ChatHandler* handler, char const* args)

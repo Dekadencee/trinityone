@@ -64,7 +64,6 @@ public:
             { "phase",        RBAC_PERM_COMMAND_MODIFY_PHASE,        false, &HandleModifyPhaseCommand,         "", NULL },
             { "rage",         RBAC_PERM_COMMAND_MODIFY_RAGE,         false, &HandleModifyRageCommand,          "", NULL },
             { "reputation",   RBAC_PERM_COMMAND_MODIFY_REPUTATION,   false, &HandleModifyRepCommand,           "", NULL },
-            { "runicpower",   RBAC_PERM_COMMAND_MODIFY_RUNICPOWER,   false, &HandleModifyRunicPowerCommand,    "", NULL },
             { "scale",        RBAC_PERM_COMMAND_MODIFY_SCALE,        false, &HandleModifyScaleCommand,         "", NULL },
             { "speed",        RBAC_PERM_COMMAND_MODIFY_SPEED,        false, NULL,           "", modifyspeedCommandTable },
             { "spell",        RBAC_PERM_COMMAND_MODIFY_SPELL,        false, &HandleModifySpellCommand,         "", NULL },
@@ -253,40 +252,6 @@ public:
 
         target->SetMaxPower(POWER_RAGE, ragem);
         target->SetPower(POWER_RAGE, rage);
-
-        return true;
-    }
-
-    // Edit Player Runic Power
-    static bool HandleModifyRunicPowerCommand(ChatHandler* handler, const char* args)
-    {
-        if (!*args)
-            return false;
-
-        int32 rune = atoi((char*)args)*10;
-        int32 runem = atoi((char*)args)*10;
-
-        if (rune <= 0 || runem <= 0 || runem < rune)
-        {
-            handler->SendSysMessage(LANG_BAD_VALUE);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        Player* target = handler->getSelectedPlayer();
-        if (!target)
-        {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        handler->PSendSysMessage(LANG_YOU_CHANGE_RUNIC_POWER, handler->GetNameLink(target).c_str(), rune/10, runem/10);
-        if (handler->needReportToTarget(target))
-            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOURS_RUNIC_POWER_CHANGED, handler->GetNameLink().c_str(), rune/10, runem/10);
-
-        target->SetMaxPower(POWER_RUNIC_POWER, runem);
-        target->SetPower(POWER_RUNIC_POWER, rune);
 
         return true;
     }

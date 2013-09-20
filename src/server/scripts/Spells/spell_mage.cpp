@@ -44,42 +44,6 @@ enum MageSpells
 };
 
 
-// -11113 - Blast Wave
-class spell_mage_blast_wave : public SpellScriptLoader
-{
-    public:
-        spell_mage_blast_wave() : SpellScriptLoader("spell_mage_blast_wave") { }
-
-        class spell_mage_blast_wave_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_blast_wave_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
-                    return false;
-                return true;
-            }
-
-            void HandleKnockBack(SpellEffIndex effIndex)
-            {
-                if (GetCaster()->HasAura(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
-                    PreventHitDefaultEffect(effIndex);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_mage_blast_wave_SpellScript::HandleKnockBack, EFFECT_2, SPELL_EFFECT_KNOCK_BACK);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_mage_blast_wave_SpellScript();
-        }
-};
-
-
 // 11958 - Cold Snap
 class spell_mage_cold_snap : public SpellScriptLoader
 {
@@ -184,7 +148,6 @@ class spell_mage_fire_frost_ward : public SpellScriptLoader
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_fire_frost_ward_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
                 OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_fire_frost_ward_AuraScript::Absorb, EFFECT_0);
-                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_fire_frost_ward_AuraScript::Trigger, EFFECT_0);
             }
         };
 
@@ -201,7 +164,7 @@ class spell_mage_ice_barrier : public SpellScriptLoader
     public:
         spell_mage_ice_barrier() : SpellScriptLoader("spell_mage_ice_barrier") { }
 
-        class spell_mage_ice_barrier_AuraScript : public spell_mage_incanters_absorbtion_base_AuraScript
+        class spell_mage_ice_barrier_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_mage_ice_barrier_AuraScript);
 
@@ -224,7 +187,6 @@ class spell_mage_ice_barrier : public SpellScriptLoader
             void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_ice_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_ice_barrier_AuraScript::Trigger, EFFECT_0);
             }
         };
 
@@ -310,7 +272,6 @@ class spell_mage_mana_shield : public SpellScriptLoader
             void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_mana_shield_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MANA_SHIELD);
-                AfterEffectManaShield += AuraEffectManaShieldFn(spell_mage_mana_shield_AuraScript::Trigger, EFFECT_0);
             }
         };
 
@@ -434,7 +395,7 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT))
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY))
                     return false;
                 return true;
             }
@@ -459,7 +420,6 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
 
 void AddSC_mage_spell_scripts()
 {
-    new spell_mage_blast_wave();
     new spell_mage_cold_snap();
     new spell_mage_fire_frost_ward();
     new spell_mage_ice_barrier();

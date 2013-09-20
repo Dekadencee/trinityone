@@ -17,7 +17,6 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "Vehicle.h"
 #include "SpellScript.h"
 #include "Player.h"
 

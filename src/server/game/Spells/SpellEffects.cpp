@@ -56,7 +56,6 @@
 #include "GridNotifiersImpl.h"
 #include "SkillDiscovery.h"
 #include "Formulas.h"
-#include "Vehicle.h"
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
 #include "AccountMgr.h"
@@ -4392,66 +4391,6 @@ void Spell::EffectActivateObject(SpellEffIndex /*effIndex*/)
     // int32 unk = m_spellInfo->Effects[effIndex].MiscValue; // This is set for EffectActivateObject spells; needs research
 
     gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, 0, m_caster, gameObjTarget);
-}
-
-void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
-{
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
-        return;
-
-    if (m_glyphIndex >= MAX_GLYPH_SLOT_INDEX)
-        return;
-
-    Player* player = m_caster->ToPlayer();
-    if (!player)
-        return;
-
-    // glyph sockets level requirement
-    uint8 minLevel = 0;
-    switch (m_glyphIndex)
-    {
-        case 0:
-        case 1: minLevel = 15; break;
-        case 2: minLevel = 50; break;
-        case 3: minLevel = 30; break;
-        case 4: minLevel = 70; break;
-        case 5: minLevel = 80; break;
-    }
-    if (minLevel && m_caster->getLevel() < minLevel)
-    {
-        SendCastResult(SPELL_FAILED_GLYPH_SOCKET_LOCKED);
-        return;
-    }
-
-    // apply new one
-    if (uint32 glyph = m_spellInfo->Effects[effIndex].MiscValue)
-    {
-        if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
-        {
-            if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(m_glyphIndex)))
-            {
-                if (gp->TypeFlags != gs->TypeFlags)
-                {
-                    SendCastResult(SPELL_FAILED_INVALID_GLYPH);
-                    return;                                 // glyph slot mismatch
-                }
-            }
-
-            // remove old glyph
-            if (uint32 oldglyph = player->GetGlyph(m_glyphIndex))
-            {
-                if (GlyphPropertiesEntry const* old_gp = sGlyphPropertiesStore.LookupEntry(oldglyph))
-                {
-                    player->RemoveAurasDueToSpell(old_gp->SpellId);
-                    player->SetGlyph(m_glyphIndex, 0);
-                }
-            }
-
-            player->CastSpell(m_caster, gp->SpellId, true);
-            player->SetGlyph(m_glyphIndex, glyph);
-            player->SendTalentsInfoData(false);
-        }
-    }
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffIndex effIndex)

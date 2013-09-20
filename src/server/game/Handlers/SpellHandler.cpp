@@ -275,7 +275,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recvData)
     {
         // ignore for remote control state
         if (_player->m_mover != _player)
-            if (!(_player->IsOnVehicle(_player->m_mover) || _player->IsMounted()) && !obj->GetGOInfo()->IsUsableMounted())
+            if (!(_player->IsMounted()) && !obj->GetGOInfo()->IsUsableMounted())
                 return;
 
         obj->Use(_player);
@@ -341,7 +341,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
         // change caster to player and let him cast
-        if (!_player->IsOnVehicle(caster) || spellInfo->CheckVehicle(_player) != SPELL_CAST_OK)
+        if (!spellInfo->CheckVehicle(_player) != SPELL_CAST_OK)
         {
             recvPacket.rfinish(); // prevent spam at ignore packet
             return;
@@ -451,7 +451,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Creature* pet=ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player, guid);
 
     if (!pet)
     {
@@ -545,7 +545,7 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
     recvData >> guid;
 
     // this will get something not in world. crash
-    Creature* unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
+    Creature* unit = ObjectAccessor::GetCreatureOrPet(*_player, guid);
 
     if (!unit)
         return;

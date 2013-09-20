@@ -25,7 +25,6 @@
 #include "ScriptLoader.h"
 #include "ScriptSystem.h"
 #include "Transport.h"
-#include "Vehicle.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "GossipDef.h"

@@ -33,7 +33,6 @@
 #include "Pet.h"
 #include "ScriptMgr.h"
 #include "Transport.h"
-#include "Vehicle.h"
 #include "VMapFactory.h"
 
 u_map_magic MapMagic        = { {'M','A','P','S'} };

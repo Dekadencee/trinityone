@@ -23,7 +23,6 @@
 #include "ConditionMgr.h"
 #include "Player.h"
 #include "Battleground.h"
-#include "Vehicle.h"
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
 {
@@ -2155,10 +2154,6 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
             case POWER_ENERGY:
             case POWER_HAPPINESS:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
-                break;
-            case POWER_RUNE:
-            case POWER_RUNIC_POWER:
-                TC_LOG_DEBUG(LOG_FILTER_SPELLS_AURAS, "CalculateManaCost: Not implemented yet!");
                 break;
             default:
                 TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "CalculateManaCost: Unknown power type '%d' in spell %d", PowerType, Id);
