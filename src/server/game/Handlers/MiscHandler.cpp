@@ -42,7 +42,6 @@
 #include "SocialMgr.h"
 #include "CellImpl.h"
 #include "AccountMgr.h"
-#include "Vehicle.h"
 #include "CreatureAI.h"
 #include "DBCEnums.h"
 #include "ScriptMgr.h"
@@ -53,7 +52,6 @@
 #include "AccountMgr.h"
 #include "Spell.h"
 #include "BattlegroundMgr.h"
-#include "Battlefield.h"
 #include "BattlefieldMgr.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)

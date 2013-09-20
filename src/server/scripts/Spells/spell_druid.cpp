@@ -135,34 +135,6 @@ class spell_dru_innervate : public SpellScriptLoader
         }
 };
 
-// -5570 - Insect Swarm
-class spell_dru_insect_swarm : public SpellScriptLoader
-{
-    public:
-        spell_dru_insect_swarm() : SpellScriptLoader("spell_dru_insect_swarm") { }
-
-        class spell_dru_insect_swarm_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dru_insect_swarm_AuraScript);
-
-            void CalculateAmount(AuraEffect const* aurEff, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                if (Unit* caster = GetCaster())
-                    if (AuraEffect const* relicAurEff = caster->GetAuraEffect(SPELL_DRUID_ITEM_T8_BALANCE_RELIC, EFFECT_0))
-                        amount += relicAurEff->GetAmount() / aurEff->GetTotalTicks();
-            }
-
-            void Register() OVERRIDE
-            {
-                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_insect_swarm_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_dru_insect_swarm_AuraScript();
-        }
-};
 
 // -33763 - Lifebloom
 class spell_dru_lifebloom : public SpellScriptLoader
@@ -390,13 +362,6 @@ class spell_dru_rip : public SpellScriptLoader
                     // 0.01 * $AP * cp
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
 
-                    // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
-                    if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
-                        amount += cp * idol->GetAmount();
-                    // Idol of Worship. Can't be handled as SpellMod due its dependency from CPs
-                    else if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_WORSHIP, EFFECT_0))
-                        amount += cp * idol->GetAmount();
-
                     amount += int32(CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp));
                 }
             }
@@ -621,7 +586,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_dash();
     new spell_dru_enrage();
     new spell_dru_innervate();
-    new spell_dru_insect_swarm();
     new spell_dru_lifebloom();
     new spell_dru_moonkin_form_passive();
     new spell_dru_predatory_strikes();

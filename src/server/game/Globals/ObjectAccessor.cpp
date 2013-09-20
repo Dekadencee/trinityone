@@ -33,7 +33,6 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "Player.h"
-#include "Vehicle.h"
 #include "World.h"
 #include "WorldPacket.h"
 
@@ -172,7 +171,7 @@ Player* ObjectAccessor::GetPlayer(WorldObject const& u, uint64 guid)
     return GetObjectInMap(guid, u.GetMap(), (Player*)NULL);
 }
 
-Creature* ObjectAccessor::GetCreatureOrPetOrVehicle(WorldObject const& u, uint64 guid)
+Creature* ObjectAccessor::GetCreatureOrPet(WorldObject const& u, uint64 guid)
 {
     if (IS_PET_GUID(guid))
         return GetPet(u, guid);

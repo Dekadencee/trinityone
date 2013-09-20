@@ -20,9 +20,6 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-
-#include "Battlefield.h"
-#include "BattlefieldMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
 

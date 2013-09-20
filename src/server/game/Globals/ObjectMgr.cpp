@@ -17,7 +17,6 @@
  */
 
 #include "AccountMgr.h"
-#include "AchievementMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Chat.h"
@@ -45,7 +44,6 @@
 #include "Transport.h"
 #include "UpdateMask.h"
 #include "Util.h"
-#include "Vehicle.h"
 #include "WaypointManager.h"
 #include "World.h"
 

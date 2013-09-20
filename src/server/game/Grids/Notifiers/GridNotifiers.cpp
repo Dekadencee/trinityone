@@ -261,7 +261,7 @@ void MessageDistDeliverer::Visit(PlayerMapType &m)
                     SendPacket(*i);
         }
 
-        if (target->m_seer == target || target->GetVehicle())
+        if (target->m_seer == target)
             SendPacket(target);
     }
 }

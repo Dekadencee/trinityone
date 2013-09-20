@@ -35,8 +35,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ScriptMgr.h"
-#include "Vehicle.h"
-#include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Pet.h"
 #include "ReputationMgr.h"

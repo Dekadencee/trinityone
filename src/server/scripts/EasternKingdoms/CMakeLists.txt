@@ -108,10 +108,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Gnomeregan/gnomeregan.h
   EasternKingdoms/zone_redridge_mountains.cpp
   EasternKingdoms/zone_ironforge.cpp
-  EasternKingdoms/ScarletEnclave/chapter2.cpp
-  EasternKingdoms/ScarletEnclave/chapter5.cpp
-  EasternKingdoms/ScarletEnclave/chapter1.cpp
-  EasternKingdoms/ScarletEnclave/zone_the_scarlet_enclave.cpp
   EasternKingdoms/zone_eastern_plaguelands.cpp
   EasternKingdoms/Stratholme/boss_baroness_anastari.cpp
   EasternKingdoms/Stratholme/boss_nerubenkan.cpp

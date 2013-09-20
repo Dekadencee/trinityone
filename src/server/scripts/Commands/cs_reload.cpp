@@ -23,7 +23,6 @@ Category: commandscripts
 EndScriptData */
 
 #include "AccountMgr.h"
-#include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
 #include "Chat.h"
 #include "CreatureEventAIMgr.h"
@@ -51,7 +50,6 @@ public:
     {
         static ChatCommand reloadAllCommandTable[] =
         {
-            { "achievement", RBAC_PERM_COMMANDS_RELOAD_ALL_ACHIEVEMENT, true,  &HandleReloadAllAchievementCommand, "", NULL },
             { "area",        RBAC_PERM_COMMANDS_RELOAD_ALL_AREA,        true,  &HandleReloadAllAreaCommand,       "", NULL },
             { "eventai",     RBAC_PERM_COMMANDS_RELOAD_ALL_EVENTAI,     true,  &HandleReloadAllEventAICommand,    "", NULL },
             { "gossips",     RBAC_PERM_COMMANDS_RELOAD_ALL_GOSSIP,      true,  &HandleReloadAllGossipsCommand,    "", NULL },
@@ -69,8 +67,6 @@ public:
         {
             { "auctions",                      RBAC_PERM_COMMANDS_RELOAD_AUCTIONS, true,  &HandleReloadAuctionsCommand,                   "", NULL },
             { "access_requirement",            RBAC_PERM_COMMANDS_RELOAD_ACCESS_REQUIREMENT, true,  &HandleReloadAccessRequirementCommand,          "", NULL },
-            { "achievement_criteria_data",     RBAC_PERM_COMMANDS_RELOAD_ACHIEVEMENT_CRITERIA_DATA, true,  &HandleReloadAchievementCriteriaDataCommand,    "", NULL },
-            { "achievement_reward",            RBAC_PERM_COMMANDS_RELOAD_ACHIEVEMENT_REWARD, true,  &HandleReloadAchievementRewardCommand,          "", NULL },
             { "all",                           RBAC_PERM_COMMANDS_RELOAD_ALL, true,  NULL,                          "", reloadAllCommandTable },
             { "areatrigger_involvedrelation",  RBAC_PERM_COMMANDS_RELOAD_AREATRIGGER_INVOLVEDRELATION, true,  &HandleReloadQuestAreaTriggersCommand,          "", NULL },
             { "areatrigger_tavern",            RBAC_PERM_COMMANDS_RELOAD_AREATRIGGER_TAVERN, true,  &HandleReloadAreaTriggerTavernCommand,          "", NULL },
@@ -106,7 +102,6 @@ public:
             { "item_loot_template",            RBAC_PERM_COMMANDS_RELOAD_ITEM_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesItemCommand,          "", NULL },
             { "item_set_names",                RBAC_PERM_COMMANDS_RELOAD_ITEM_SET_NAMES, true,  &HandleReloadItemSetNamesCommand,               "", NULL },
             { "lfg_dungeon_rewards",           RBAC_PERM_COMMANDS_RELOAD_LFG_DUNGEON_REWARDS, true,  &HandleReloadLfgRewardsCommand,                 "", NULL },
-            { "locales_achievement_reward",    RBAC_PERM_COMMANDS_RELOAD_LOCALES_ACHIEVEMENT_REWARD, true,  &HandleReloadLocalesAchievementRewardCommand,   "", NULL },
             { "locales_creature",              RBAC_PERM_COMMANDS_RELOAD_LOCALES_CRETURE, true,  &HandleReloadLocalesCreatureCommand,            "", NULL },
             { "locales_creature_text",         RBAC_PERM_COMMANDS_RELOAD_LOCALES_CRETURE_TEXT, true,  &HandleReloadLocalesCreatureTextCommand,        "", NULL },
             { "locales_gameobject",            RBAC_PERM_COMMANDS_RELOAD_LOCALES_GAMEOBJECT, true,  &HandleReloadLocalesGameobjectCommand,          "", NULL },
@@ -204,13 +199,6 @@ public:
         HandleReloadVehicleTemplateAccessoryCommand(handler, "");
 
         HandleReloadAutobroadcastCommand(handler, "");
-        return true;
-    }
-
-    static bool HandleReloadAllAchievementCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        HandleReloadAchievementCriteriaDataCommand(handler, "");
-        HandleReloadAchievementRewardCommand(handler, "");
         return true;
     }
 
@@ -317,7 +305,6 @@ public:
 
     static bool HandleReloadAllLocalesCommand(ChatHandler* handler, const char* /*args*/)
     {
-        HandleReloadLocalesAchievementRewardCommand(handler, "a");
         HandleReloadLocalesCreatureCommand(handler, "a");
         HandleReloadLocalesCreatureTextCommand(handler, "a");
         HandleReloadLocalesGameobjectCommand(handler, "a");
@@ -344,22 +331,6 @@ public:
         TC_LOG_INFO(LOG_FILTER_GENERAL, "Re-Loading Access Requirement definitions...");
         sObjectMgr->LoadAccessRequirements();
         handler->SendGlobalGMSysMessage("DB table `access_requirement` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadAchievementCriteriaDataCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        TC_LOG_INFO(LOG_FILTER_GENERAL, "Re-Loading Additional Achievement Criteria Data...");
-        sAchievementMgr->LoadAchievementCriteriaData();
-        handler->SendGlobalGMSysMessage("DB table `achievement_criteria_data` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadAchievementRewardCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        TC_LOG_INFO(LOG_FILTER_GENERAL, "Re-Loading Achievement Reward Data...");
-        sAchievementMgr->LoadRewards();
-        handler->SendGlobalGMSysMessage("DB table `achievement_reward` reloaded.");
         return true;
     }
 
@@ -1088,14 +1059,6 @@ public:
         TC_LOG_INFO(LOG_FILTER_GENERAL, "Checking quest disables...");
         DisableMgr::CheckQuestDisables();
         handler->SendGlobalGMSysMessage("DB table `disables` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadLocalesAchievementRewardCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        TC_LOG_INFO(LOG_FILTER_GENERAL, "Re-Loading Locales Achievement Reward Data...");
-        sAchievementMgr->LoadRewardLocales();
-        handler->SendGlobalGMSysMessage("DB table `locales_achievement_reward` reloaded.");
         return true;
     }
 

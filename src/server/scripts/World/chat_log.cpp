@@ -80,12 +80,6 @@ public:
                         player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                 break;
 
-            case CHAT_MSG_PARTY_LEADER:
-                if (sWorld->getBoolConfig(CONFIG_CHATLOG_PARTY))
-                    TC_LOG_DEBUG(LOG_FILTER_PLAYER_CHATLOG, "[PARTY] Leader %s tells group: %s",
-                        player->GetName().c_str(), msg.c_str());
-                break;
-
             case CHAT_MSG_RAID:
                 if (lang != LANG_ADDON && sWorld->getBoolConfig(CONFIG_CHATLOG_RAID))
                     TC_LOG_DEBUG(LOG_FILTER_PLAYER_CHATLOG, "[RAID] Player %s tells raid with leader %s: %s",
