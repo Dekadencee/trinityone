@@ -1549,7 +1549,6 @@ class Player : public Unit, public GridObject<Player>
         void AddMItem(Item* it);
         bool RemoveMItem(uint32 id);
 
-        void SendOnCancelExpectedVehicleRideAura();
         void PetSpellInitialize();
         void CharmSpellInitialize();
         void PossessSpellInitialize();        

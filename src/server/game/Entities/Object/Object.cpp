@@ -61,7 +61,6 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
         case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
         case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
         case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
-        case HIGHGUID_VEHICLE:      return TYPEID_UNIT;
     }
     return NUM_CLIENT_OBJECT_TYPES;                         // unknown
 }
@@ -472,18 +471,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     {
         *data << uint32(getMSTime());                       // Unknown - getMSTime is wrong.
     }
-
-    // 0x80
-    if (flags & UPDATEFLAG_VEHICLE)
-    {
-        /// @todo Allow players to aquire this updateflag.
-        *data << uint32(unit->GetVehicleKit()->GetVehicleInfo()->m_ID);
-        *data << float(unit->GetOrientation());
-    }
-
-    // 0x200
-    if (flags & UPDATEFLAG_ROTATION)
-        *data << int64(ToGameObject()->GetRotation());
 }
 
 void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
@@ -2150,9 +2137,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             case SUMMON_CATEGORY_PUPPET:
                 mask = UNIT_MASK_PUPPET;
                 break;
-            case SUMMON_CATEGORY_VEHICLE:
-                mask = UNIT_MASK_MINION;
-                break;
             case SUMMON_CATEGORY_WILD:
             case SUMMON_CATEGORY_ALLY:
             case SUMMON_CATEGORY_UNK:
@@ -2167,10 +2151,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                 case SUMMON_TYPE_TOTEM:
                 case SUMMON_TYPE_LIGHTWELL:
                     mask = UNIT_MASK_TOTEM;
-                    break;
-                case SUMMON_TYPE_VEHICLE:
-                case SUMMON_TYPE_VEHICLE2:
-                    mask = UNIT_MASK_SUMMON;
                     break;
                 case SUMMON_TYPE_MINIPET:
                     mask = UNIT_MASK_MINION;

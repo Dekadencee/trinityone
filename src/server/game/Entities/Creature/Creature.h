@@ -122,7 +122,6 @@ struct CreatureTemplate
     int32   resistance[MAX_SPELL_SCHOOL];
     uint32  spells[CREATURE_MAX_SPELLS];
     uint32  PetSpellDataId;
-    uint32  VehicleId;
     uint32  mingold;
     uint32  maxgold;
     std::string AIName;
@@ -459,7 +458,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         void DisappearAndDie();
 
-        bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
+        bool Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
         bool LoadCreaturesAddon(bool reload = false);
         void SelectLevel(const CreatureTemplate* cinfo);
         void LoadEquipment(int8 id = 1, bool force = false);
@@ -704,7 +703,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool m_isTempWorldObject; //true when possessed
 
     protected:
-        bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData* data = NULL);
+        bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
 
         // vendor items

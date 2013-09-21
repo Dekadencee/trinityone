@@ -30,7 +30,6 @@ enum HighGuid
     HIGHGUID_TRANSPORT      = 0xF120,                      // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
     HIGHGUID_UNIT           = 0xF130,                      // blizz F130
     HIGHGUID_PET            = 0xF140,                      // blizz F140
-    HIGHGUID_VEHICLE        = 0xF150,                      // blizz F550
     HIGHGUID_DYNAMICOBJECT  = 0xF100,                      // blizz F100
     HIGHGUID_CORPSE         = 0xF101,                      // blizz F100
     HIGHGUID_MO_TRANSPORT   = 0x1FC0,                      // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
@@ -49,9 +48,7 @@ inline uint16 PAIR32_LOPART(uint32 x);
 inline bool IS_EMPTY_GUID(uint64 guid);
 inline bool IS_CREATURE_GUID(uint64 guid);
 inline bool IS_PET_GUID(uint64 guid);
-inline bool IS_VEHICLE_GUID(uint64 guid);
-inline bool IS_CRE_OR_VEH_GUID(uint64 guid);
-inline bool IS_CRE_OR_VEH_OR_PET_GUID(uint64 guid);
+inline bool IS_CRE_OR_PET_GUID(uint64 guid);
 inline bool IS_PLAYER_GUID(uint64 guid);
 inline bool IS_UNIT_GUID(uint64 guid);
 inline bool IS_ITEM_GUID(uint64 guid);
@@ -125,19 +122,9 @@ bool IS_PET_GUID(uint64 guid)
     return GUID_HIPART(guid) == HIGHGUID_PET;
 }
 
-bool IS_VEHICLE_GUID(uint64 guid)
+bool IS_CRE_OR_PET_GUID(uint64 guid)
 {
-    return GUID_HIPART(guid) == HIGHGUID_VEHICLE;
-}
-
-bool IS_CRE_OR_VEH_GUID(uint64 guid)
-{
-    return IS_CREATURE_GUID(guid) || IS_VEHICLE_GUID(guid);
-}
-
-bool IS_CRE_OR_VEH_OR_PET_GUID(uint64 guid)
-{
-    return IS_CRE_OR_VEH_GUID(guid) || IS_PET_GUID(guid);
+    return IS_CREATURE_GUID(guid) || IS_PET_GUID(guid);
 }
 
 bool IS_PLAYER_GUID(uint64 guid)
@@ -147,7 +134,7 @@ bool IS_PLAYER_GUID(uint64 guid)
 
 bool IS_UNIT_GUID(uint64 guid)
 {
-    return IS_CRE_OR_VEH_OR_PET_GUID(guid) || IS_PLAYER_GUID(guid);
+    return IS_CRE_OR_PET_GUID(guid) || IS_PLAYER_GUID(guid);
 }
 
 bool IS_ITEM_GUID(uint64 guid)
@@ -223,7 +210,6 @@ bool IsGuidHaveEnPart(uint64 guid)
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
-        case HIGHGUID_VEHICLE:
         case HIGHGUID_MO_TRANSPORT:
         default:
             return true;
@@ -240,7 +226,6 @@ char const* GetLogNameForGuid(uint64 guid)
         case HIGHGUID_TRANSPORT:    return "transport";
         case HIGHGUID_UNIT:         return "creature";
         case HIGHGUID_PET:          return "pet";
-        case HIGHGUID_VEHICLE:      return "vehicle";
         case HIGHGUID_DYNAMICOBJECT:return "dynobject";
         case HIGHGUID_CORPSE:       return "corpse";
         case HIGHGUID_MO_TRANSPORT: return "mo_transport";
