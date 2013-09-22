@@ -1533,7 +1533,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
                         if (!player->GetWeaponForAttack(BASE_ATTACK) || !player->IsUseEquipedWeapon(true))
                             return SPELL_FAILED_TARGET_NO_WEAPONS;
                     }
-                    else if (!unitTarget->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID))
+                    else if (!unitTarget->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY))
                         return SPELL_FAILED_TARGET_NO_WEAPONS;
                 }
             }
@@ -1601,7 +1601,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
     cannot be solved from within the check in other way since target type cannot be called for the spell currently
     Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
-    if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
+    if (!caster->GetCharmerOrOwner() == target)
     {
         if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
             return SPELL_FAILED_TARGET_AURASTATE;
@@ -1646,65 +1646,14 @@ SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject c
                 || (neededTargets & TARGET_FLAG_UNIT_RAID && caster->IsInRaidWith(unitTarget)))
                     if (caster->_IsValidAssistTarget(unitTarget, this))
                         return SPELL_CAST_OK;
+/*
             if (neededTargets & TARGET_FLAG_UNIT_MINIPET)
                 if (unitTarget->GetGUID() == caster->GetCritterGUID())
                     return SPELL_CAST_OK;
-            if (neededTargets & TARGET_FLAG_UNIT_PASSENGER)
-                if (unitTarget->IsOnVehicle(caster))
-                    return SPELL_CAST_OK;
+*/ // Research mini pets for 2.4.3
             return SPELL_FAILED_BAD_TARGETS;
         }
     }
-    return SPELL_CAST_OK;
-}
-
-SpellCastResult SpellInfo::CheckVehicle(Unit const* caster) const
-{
-    // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
-    if (caster->GetTypeId() != TYPEID_PLAYER)
-        return SPELL_CAST_OK;
-
-    Vehicle* vehicle = caster->GetVehicle();
-    if (vehicle)
-    {
-        uint16 checkMask = 0;
-        for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
-        {
-            if (Effects[effIndex].ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
-            {
-                SpellShapeshiftEntry const* shapeShiftEntry = sSpellShapeshiftStore.LookupEntry(Effects[effIndex].MiscValue);
-                if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
-                    checkMask |= VEHICLE_SEAT_FLAG_UNCONTROLLED;
-                break;
-            }
-        }
-
-        if (HasAura(SPELL_AURA_MOUNTED))
-            checkMask |= VEHICLE_SEAT_FLAG_CAN_CAST_MOUNT_SPELL;
-
-        if (!checkMask)
-            checkMask = VEHICLE_SEAT_FLAG_CAN_ATTACK;
-
-        VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(caster);
-        if (!(AttributesEx6 & SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE) && !(Attributes & SPELL_ATTR0_CASTABLE_WHILE_MOUNTED)
-            && (vehicleSeat->m_flags & checkMask) != checkMask)
-            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
-        // Can only summon uncontrolled minions/guardians when on controlled vehicle
-        if (vehicleSeat->m_flags & (VEHICLE_SEAT_FLAG_CAN_CONTROL | VEHICLE_SEAT_FLAG_UNK2))
-        {
-            for (uint32 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
-            {
-                if (Effects[i].Effect != SPELL_EFFECT_SUMMON)
-                    continue;
-
-                SummonPropertiesEntry const* props = sSummonPropertiesStore.LookupEntry(Effects[i].MiscValueB);
-                if (props && props->Category != SUMMON_CATEGORY_WILD)
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-            }
-        }
-    }
-
     return SPELL_CAST_OK;
 }
 

@@ -145,9 +145,7 @@ namespace Movement
     {
         if (args.TransformForTransport)
         {
-            if (Unit* vehicle = unit->GetVehicleBase())
-                angle -= vehicle->GetOrientation();
-            else if (Transport* transport = unit->GetTransport())
+            if (Transport* transport = unit->GetTransport())
                 angle -= transport->GetOrientation();
         }
 
@@ -173,7 +171,7 @@ namespace Movement
         TransportPathTransform transform(unit, args.TransformForTransport);
         args.path[1] = transform(dest);
     }
-
+/*
     Vector3 TransportPathTransform::operator()(Vector3 input)
     {
         if (_transformForTransport)
@@ -182,4 +180,5 @@ namespace Movement
 
         return input;
     }
+*/ // Will need a lot of work on transports for 2.4.3
 }

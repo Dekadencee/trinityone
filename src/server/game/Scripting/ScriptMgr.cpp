@@ -1011,63 +1011,6 @@ bool ScriptMgr::OnConditionCheck(Condition* condition, ConditionSourceInfo& sour
     return tmpscript->OnConditionCheck(condition, sourceInfo);
 }
 
-void ScriptMgr::OnInstall(Vehicle* veh)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnInstall(veh);
-}
-
-void ScriptMgr::OnUninstall(Vehicle* veh)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnUninstall(veh);
-}
-
-void ScriptMgr::OnReset(Vehicle* veh)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnReset(veh);
-}
-
-void ScriptMgr::OnInstallAccessory(Vehicle* veh, Creature* accessory)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-    ASSERT(accessory);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnInstallAccessory(veh, accessory);
-}
-
-void ScriptMgr::OnAddPassenger(Vehicle* veh, Unit* passenger, int8 seatId)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-    ASSERT(passenger);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnAddPassenger(veh, passenger, seatId);
-}
-
-void ScriptMgr::OnRemovePassenger(Vehicle* veh, Unit* passenger)
-{
-    ASSERT(veh);
-    ASSERT(veh->GetBase()->GetTypeId() == TYPEID_UNIT);
-    ASSERT(passenger);
-
-    GET_SCRIPT(VehicleScript, veh->GetBase()->ToCreature()->GetScriptId(), tmpscript);
-    tmpscript->OnRemovePassenger(veh, passenger);
-}
-
 void ScriptMgr::OnDynamicObjectUpdate(DynamicObject* dynobj, uint32 diff)
 {
     ASSERT(dynobj);

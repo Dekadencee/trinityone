@@ -35,7 +35,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ScriptMgr.h"
-#include "BattlefieldMgr.h"
 #include "Pet.h"
 #include "ReputationMgr.h"
 
@@ -1139,22 +1138,6 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
 
                 if (spellInfo->Stances & (1<<(GetMiscValue()-1)))
                     target->CastSpell(target, itr->first, true, NULL, this);
-            }
-
-            // Also do it for Glyphs
-            for (uint32 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-            {
-                if (uint32 glyphId = target->ToPlayer()->GetGlyph(i))
-                {
-                    if (GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId))
-                    {
-                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(glyph->SpellId);
-                        if (!spellInfo || !(spellInfo->Attributes & (SPELL_ATTR0_PASSIVE | SPELL_ATTR0_HIDDEN_CLIENTSIDE)))
-                            continue;
-                        if (spellInfo->Stances & (1<<(GetMiscValue()-1)))
-                            target->CastSpell(target, glyph->SpellId, true, NULL, this);
-                    }
-                }
             }
 
             // Leader of the Pack
@@ -2517,8 +2500,6 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
             displayId = ObjectMgr::ChooseDisplayId(creatureInfo);
             sObjectMgr->GetCreatureModelRandomGender(&displayId);
 
-            vehicleId = creatureInfo->VehicleId;
-
             //some spell has one aura of mount and one of vehicle
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (GetSpellInfo()->Effects[i].Effect == SPELL_EFFECT_SUMMON
@@ -2526,7 +2507,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                     displayId = 0;
         }
 
-        target->Mount(displayId, vehicleId, creatureEntry);
+        target->Mount(displayId, creatureEntry);
     }
     else
     {
@@ -2865,49 +2846,6 @@ void AuraEffect::HandleCharmConvert(AuraApplication const* aurApp, uint8 mode, b
  * Such auras are applied from a caster(=player) to a vehicle.
  * This has been verified using spell #49256
  */
-void AuraEffect::HandleAuraControlVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
-        return;
-
-    Unit* target = aurApp->GetTarget();
-    if (!target->IsVehicle())
-        return;
-
-    Unit* caster = GetCaster();
-    if (!caster || caster == target)
-        return;
-
-    if (apply)
-    {
-        // Currently spells that have base points  0 and DieSides 0 = "0/0" exception are pushed to -1,
-        // however the idea of 0/0 is to ingore flag VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT and -1 checks for it,
-        // so this break such spells or most of them.
-        // Current formula about m_amount: effect base points + dieside - 1
-        // TO DO: Reasearch more about 0/0 and fix it.
-        caster->_EnterVehicle(target->GetVehicleKit(), m_amount - 1, aurApp);
-    }
-    else
-    {
-        // Remove pending passengers before exiting vehicle - might cause an Uninstall
-        target->GetVehicleKit()->RemovePendingEventsForPassenger(caster);
-
-        if (GetId() == 53111) // Devour Humanoid
-        {
-            target->Kill(caster);
-            if (caster->GetTypeId() == TYPEID_UNIT)
-                caster->ToCreature()->RemoveCorpse();
-        }
-
-        if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT))
-            caster->_ExitVehicle();
-        else
-            target->GetVehicleKit()->RemovePassenger(caster);  // Only remove passenger from vehicle without launching exit movement or despawning the vehicle
-
-        // some SPELL_AURA_CONTROL_VEHICLE auras have a dummy effect on the player - remove them
-        caster->RemoveAurasDueToSpell(GetId());
-    }
-}
 
 /*********************************************************/
 /***                  MODIFY SPEED                     ***/
@@ -3759,8 +3697,6 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
     // Update manaregen value
     if (GetMiscValue() == POWER_MANA)
         target->ToPlayer()->UpdateManaRegen();
-    else if (GetMiscValue() == POWER_RUNE)
-        target->ToPlayer()->UpdateRuneRegen(RuneType(GetMiscValueB()));
     // other powers are not immediate effects - implemented in Player::Regenerate, Creature::Regenerate
 }
 
@@ -4461,6 +4397,7 @@ void AuraEffect::HandleNoReagentUseAura(AuraApplication const* aurApp, uint8 mod
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+/*
     flag96 mask;
     Unit::AuraEffectList const& noReagent = target->GetAuraEffectsByType(SPELL_AURA_NO_REAGENT_USE);
         for (Unit::AuraEffectList::const_iterator i = noReagent.begin(); i != noReagent.end(); ++i)
@@ -4469,6 +4406,7 @@ void AuraEffect::HandleNoReagentUseAura(AuraApplication const* aurApp, uint8 mod
     target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1  , mask[0]);
     target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+1, mask[1]);
     target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+2, mask[2]);
+*/ // Reagent system needs fix for 2.4.3
 }
 
 void AuraEffect::HandleAuraRetainComboPoints(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4691,8 +4629,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             {
                                 if (Battleground* bg = target->ToPlayer()->GetBattleground())
                                     bg->RemovePlayerFromResurrectQueue(target->GetGUID());
-                                if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(target->GetZoneId()))
-                                    bf->RemovePlayerFromResurrectQueue(target->GetGUID());
                             }
                             break;
                         case 36730:                                     // Flame Strike
@@ -5152,6 +5088,7 @@ void AuraEffect::HandleAuraOpenStable(AuraApplication const* aurApp, uint8 mode,
      // client auto close stable dialog at !apply aura
 }
 
+/*
 void AuraEffect::HandleAuraModFakeInebriation(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
@@ -5192,6 +5129,7 @@ void AuraEffect::HandleAuraModFakeInebriation(AuraApplication const* aurApp, uin
     // call functions which may have additional effects after chainging state of unit
     target->UpdateObjectVisibility();
 }
+*/ // I don't think this existed in 2.4.3
 
 void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
@@ -5221,35 +5159,6 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
                 if (uint32 spellId = overrideSpells->spellId[i])
                     target->RemoveTemporarySpell(spellId);
     }
-}
-
-void AuraEffect::HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & AURA_EFFECT_HANDLE_REAL))
-        return;
-
-    Unit* target = aurApp->GetTarget();
-
-    if (target->GetTypeId() != TYPEID_PLAYER || !target->IsInWorld())
-        return;
-
-    uint32 vehicleId = GetMiscValue();
-
-    if (apply)
-    {
-        if (!target->CreateVehicleKit(vehicleId, 0))
-            return;
-    }
-    else if (target->GetVehicleKit())
-        target->RemoveVehicleKit();
-
-    WorldPacket data(SMSG_PLAYER_VEHICLE_DATA, target->GetPackGUID().size()+4);
-    data.appendPackGUID(target->GetGUID());
-    data << uint32(apply ? vehicleId : 0);
-    target->SendMessageToSet(&data, true);
-
-    if (apply)
-        target->ToPlayer()->SendOnCancelExpectedVehicleRideAura();
 }
 
 void AuraEffect::HandlePreventResurrection(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5291,8 +5200,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (target->GetMap()->IsDungeon() && int(target->GetAppliedAuras().count(62399)) >= (target->GetMap()->IsHeroic() ? 4 : 2))
                     {
                          target->CastSpell(target, 62475, true); // System Shutdown
-                         if (Unit* veh = target->GetVehicleBase())
-                             veh->CastSpell(target, 62475, true);
                     }
                     break;
                 case 64821: // Fuse Armor (Razorscale)
