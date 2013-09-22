@@ -144,9 +144,6 @@ enum Spells
 
 enum Creatures
 {
-    // Tiger Matriarch Credit
-    NPC_TIGER_VEHICLE                   = 40305,
-
     // Troll Volunteer
     NPC_URUZIN                          = 40253,
     NPC_VOLUNTEER_1                     = 40264,
@@ -172,176 +169,6 @@ enum Points
     POINT_URUZIN                        = 4026400,
 };
 
-class npc_tiger_matriarch_credit : public CreatureScript
-{
-    public:
-        npc_tiger_matriarch_credit() : CreatureScript("npc_tiger_matriarch_credit") { }
-
-        struct npc_tiger_matriarch_creditAI : public ScriptedAI
-        {
-           npc_tiger_matriarch_creditAI(Creature* creature) : ScriptedAI(creature)
-           {
-               SetCombatMovement(false);
-               events.ScheduleEvent(EVENT_CHECK_SUMMON_AURA, 2000);
-           }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                events.Update(diff);
-
-                if (events.ExecuteEvent() == EVENT_CHECK_SUMMON_AURA)
-                {
-                    std::list<Creature*> tigers;
-                    GetCreatureListWithEntryInGrid(tigers, me, NPC_TIGER_VEHICLE, 15.0f);
-                    if (!tigers.empty())
-                    {
-                        for (std::list<Creature*>::iterator itr = tigers.begin(); itr != tigers.end(); ++itr)
-                        {
-                            if (!(*itr)->IsSummon())
-                                continue;
-
-                            if (Unit* summoner = (*itr)->ToTempSummon()->GetSummoner())
-                                if (!summoner->HasAura(SPELL_NO_SUMMON_AURA) && !summoner->HasAura(SPELL_SUMMON_ZENTABRA_TRIGGER)
-                                    && !summoner->IsInCombat())
-                                {
-                                    me->AddAura(SPELL_NO_SUMMON_AURA, summoner);
-                                    me->AddAura(SPELL_DETECT_INVIS, summoner);
-                                    summoner->CastSpell(summoner, SPELL_SUMMON_MATRIARCH, true);
-                                    Talk(SAY_MATRIARCH_AGGRO, summoner->GetGUID());
-                                }
-                        }
-                    }
-
-                    events.ScheduleEvent(EVENT_CHECK_SUMMON_AURA, 5000);
-                }
-            }
-
-        private:
-            EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_tiger_matriarch_creditAI(creature);
-        }
-};
-
-class npc_tiger_matriarch : public CreatureScript
-{
-    public:
-        npc_tiger_matriarch() : CreatureScript("npc_tiger_matriarch") {}
-
-        struct npc_tiger_matriarchAI : public ScriptedAI
-        {
-            npc_tiger_matriarchAI(Creature* creature) : ScriptedAI(creature),
-                _tigerGuid(0)
-            {
-            }
-
-            void EnterCombat(Unit* /*target*/) OVERRIDE
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EVENT_POUNCE, 100);
-                _events.ScheduleEvent(EVENT_NOSUMMON, 50000);
-            }
-
-            void IsSummonedBy(Unit* summoner) OVERRIDE
-            {
-                if (summoner->GetTypeId() != TYPEID_PLAYER || !summoner->GetVehicle())
-                    return;
-
-                _tigerGuid = summoner->GetVehicle()->GetBase()->GetGUID();
-                if (Unit* tiger = ObjectAccessor::GetUnit(*me, _tigerGuid))
-                {
-                    me->AddThreat(tiger, 500000.0f);
-                    DoCast(me, SPELL_FURIOUS_BITE);
-                }
-            }
-
-            void KilledUnit(Unit* victim) OVERRIDE
-            {
-                if (victim->GetTypeId() != TYPEID_UNIT || !victim->IsSummon())
-                    return;
-
-                if (Unit* vehSummoner = victim->ToTempSummon()->GetSummoner())
-                {
-                    vehSummoner->RemoveAurasDueToSpell(SPELL_NO_SUMMON_AURA);
-                    vehSummoner->RemoveAurasDueToSpell(SPELL_DETECT_INVIS);
-                    vehSummoner->RemoveAurasDueToSpell(SPELL_SPIRIT_OF_THE_TIGER_RIDER);
-                    vehSummoner->RemoveAurasDueToSpell(SPELL_SUMMON_ZENTABRA_TRIGGER);
-                }
-                me->DespawnOrUnsummon();
-            }
-
-            void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
-            {
-                if (!attacker->IsSummon())
-                    return;
-
-                if (HealthBelowPct(20))
-                {
-                    damage = 0;
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    if (Unit* vehSummoner = attacker->ToTempSummon()->GetSummoner())
-                    {
-                        vehSummoner->AddAura(SPELL_SUMMON_ZENTABRA_TRIGGER, vehSummoner);
-                        vehSummoner->CastSpell(vehSummoner, SPELL_SUMMON_ZENTABRA, true);
-                        attacker->CastSpell(attacker, SPELL_EJECT_PASSENGERS, true);
-                        vehSummoner->RemoveAurasDueToSpell(SPELL_NO_SUMMON_AURA);
-                        vehSummoner->RemoveAurasDueToSpell(SPELL_DETECT_INVIS);
-                        vehSummoner->RemoveAurasDueToSpell(SPELL_SPIRIT_OF_THE_TIGER_RIDER);
-                        vehSummoner->RemoveAurasDueToSpell(SPELL_SUMMON_ZENTABRA_TRIGGER);
-                    }
-
-                    me->DespawnOrUnsummon();
-                }
-            }
-
-            void UpdateAI(uint32 diff) OVERRIDE
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (!_tigerGuid)
-                    return;
-
-                _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_POUNCE:
-                            DoCastVictim(SPELL_POUNCE);
-                            _events.ScheduleEvent(EVENT_POUNCE, 30000);
-                            break;
-                        case EVENT_NOSUMMON: // Reapply SPELL_NO_SUMMON_AURA
-                            if (Unit* tiger = ObjectAccessor::GetUnit(*me, _tigerGuid))
-                            {
-                                if (tiger->IsSummon())
-                                    if (Unit* vehSummoner = tiger->ToTempSummon()->GetSummoner())
-                                        me->AddAura(SPELL_NO_SUMMON_AURA, vehSummoner);
-                            }
-                            _events.ScheduleEvent(EVENT_NOSUMMON, 50000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-            EventMap _events;
-            uint64 _tigerGuid;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_tiger_matriarchAI(creature);
-        }
-};
 
 // These models was found in sniff.
 /// @todo generalize these models with race from dbc
@@ -584,9 +411,7 @@ class spell_voodoo : public SpellScriptLoader
 
 void AddSC_durotar()
 {
-    new npc_lazy_peon();
-    new npc_tiger_matriarch_credit();
-    new npc_tiger_matriarch();
+    new npc_lazy_peon();    
     new npc_troll_volunteer();
     new spell_mount_check();
     new spell_voljin_war_drums();
