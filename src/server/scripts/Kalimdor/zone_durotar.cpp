@@ -144,9 +144,6 @@ enum Spells
 
 enum Creatures
 {
-    // Tiger Matriarch Credit
-    NPC_TIGER_VEHICLE                   = 40305,
-
     // Troll Volunteer
     NPC_URUZIN                          = 40253,
     NPC_VOLUNTEER_1                     = 40264,
