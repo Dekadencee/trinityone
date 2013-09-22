@@ -481,7 +481,7 @@ void ObjectMgr::LoadCreatureTemplates()
             creatureTemplate.spells[i] = fields[54 + i].GetUInt32();
 
         creatureTemplate.PetSpellDataId = fields[62].GetUInt32();
-        creatureTemplate.VehicleId      = fields[63].GetUInt32();
+// - not in 2.4.3        creatureTemplate.VehicleId      = fields[63].GetUInt32();
         creatureTemplate.mingold        = fields[64].GetUInt32();
         creatureTemplate.maxgold        = fields[65].GetUInt32();
         creatureTemplate.AIName         = fields[66].GetString();
@@ -825,16 +825,6 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has wrong value (%f) in `HoverHeight`", cInfo->Entry, cInfo->HoverHeight);
         const_cast<CreatureTemplate*>(cInfo)->HoverHeight = 1.0f;
-    }
-
-    if (cInfo->VehicleId)
-    {
-        VehicleEntry const* vehId = sVehicleStore.LookupEntry(cInfo->VehicleId);
-        if (!vehId)
-        {
-             TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has a non-existing VehicleId (%u). This *WILL* cause the client to freeze!", cInfo->Entry, cInfo->VehicleId);
-             const_cast<CreatureTemplate*>(cInfo)->VehicleId = 0;
-        }
     }
 
     if (cInfo->PetSpellDataId)
@@ -2841,104 +2831,6 @@ void ObjectMgr::LoadItemSetNames()
     }
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u item set names in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
-void ObjectMgr::LoadVehicleTemplateAccessories()
-{
-    uint32 oldMSTime = getMSTime();
-
-    _vehicleTemplateAccessoryStore.clear();                           // needed for reload case
-
-    uint32 count = 0;
-
-    //                                                  0             1              2          3           4             5
-    QueryResult result = WorldDatabase.Query("SELECT `entry`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer` FROM `vehicle_template_accessory`");
-
-    if (!result)
-    {
-        TC_LOG_ERROR(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 vehicle template accessories. DB table `vehicle_template_accessory` is empty.");
-        return;
-    }
-
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 uiEntry      = fields[0].GetUInt32();
-        uint32 uiAccessory  = fields[1].GetUInt32();
-        int8   uiSeat       = int8(fields[2].GetInt8());
-        bool   bMinion      = fields[3].GetBool();
-        uint8  uiSummonType = fields[4].GetUInt8();
-        uint32 uiSummonTimer= fields[5].GetUInt32();
-
-        if (!sObjectMgr->GetCreatureTemplate(uiEntry))
-        {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Table `vehicle_template_accessory`: creature template entry %u does not exist.", uiEntry);
-            continue;
-        }
-
-        if (!sObjectMgr->GetCreatureTemplate(uiAccessory))
-        {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Table `vehicle_template_accessory`: Accessory %u does not exist.", uiAccessory);
-            continue;
-        }
-
-        if (_spellClickInfoStore.find(uiEntry) == _spellClickInfoStore.end())
-        {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Table `vehicle_template_accessory`: creature template entry %u has no data in npc_spellclick_spells", uiEntry);
-            continue;
-        }
-
-        _vehicleTemplateAccessoryStore[uiEntry].push_back(VehicleAccessory(uiAccessory, uiSeat, bMinion, uiSummonType, uiSummonTimer));
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u Vehicle Template Accessories in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
-void ObjectMgr::LoadVehicleAccessories()
-{
-    uint32 oldMSTime = getMSTime();
-
-    _vehicleAccessoryStore.clear();                           // needed for reload case
-
-    uint32 count = 0;
-
-    //                                                  0             1             2          3           4             5
-    QueryResult result = WorldDatabase.Query("SELECT `guid`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer` FROM `vehicle_accessory`");
-
-    if (!result)
-    {
-        TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 Vehicle Accessories in %u ms", GetMSTimeDiffToNow(oldMSTime));
-        return;
-    }
-
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 uiGUID       = fields[0].GetUInt32();
-        uint32 uiAccessory  = fields[1].GetUInt32();
-        int8   uiSeat       = int8(fields[2].GetInt16());
-        bool   bMinion      = fields[3].GetBool();
-        uint8  uiSummonType = fields[4].GetUInt8();
-        uint32 uiSummonTimer= fields[5].GetUInt32();
-
-        if (!sObjectMgr->GetCreatureTemplate(uiAccessory))
-        {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Table `vehicle_accessory`: Accessory %u does not exist.", uiAccessory);
-            continue;
-        }
-
-        _vehicleAccessoryStore[uiGUID].push_back(VehicleAccessory(uiAccessory, uiSeat, bMinion, uiSummonType, uiSummonTimer));
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u Vehicle Accessories in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadPetLevelInfo()
@@ -6018,15 +5910,6 @@ void ObjectMgr::LoadAccessRequirements()
             }
         }
 
-        if (ar->achievement)
-        {
-            if (!sAchievementMgr->GetAchievement(ar->achievement))
-            {
-                TC_LOG_ERROR(LOG_FILTER_SQL, "Required Achievement %u not exist for map %u difficulty %u, remove quest done requirement.", ar->achievement, mapid, difficulty);
-                ar->achievement = 0;
-            }
-        }
-
         _accessRequirementStore[requirement_ID] = ar;
     } while (result->NextRow());
 
@@ -6188,11 +6071,6 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         {
             ASSERT(_hiPetGuid < 0x00FFFFFE && "Pet guid overflow!");
             return _hiPetGuid++;
-        }
-        case HIGHGUID_VEHICLE:
-        {
-            ASSERT(_hiVehicleGuid < 0x00FFFFFF && "Vehicle guid overflow!");
-            return _hiVehicleGuid++;
         }
         case HIGHGUID_PLAYER:
         {
@@ -8541,41 +8419,6 @@ void ObjectMgr::LoadCreatureClassLevelStats()
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u creature base stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-void ObjectMgr::LoadFactionChangeAchievements()
-{
-    uint32 oldMSTime = getMSTime();
-
-    QueryResult result = WorldDatabase.Query("SELECT alliance_id, horde_id FROM player_factionchange_achievement");
-
-    if (!result)
-    {
-        TC_LOG_ERROR(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 faction change achievement pairs. DB table `player_factionchange_achievement` is empty.");
-        return;
-    }
-
-    uint32 count = 0;
-
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 alliance = fields[0].GetUInt32();
-        uint32 horde = fields[1].GetUInt32();
-
-        if (!sAchievementMgr->GetAchievement(alliance))
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Achievement %u (alliance_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!", alliance);
-        else if (!sAchievementMgr->GetAchievement(horde))
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Achievement %u (horde_id) referenced in `player_factionchange_achievement` does not exist, pair skipped!", horde);
-        else
-            FactionChangeAchievements[alliance] = horde;
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u faction change achievement pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
 void ObjectMgr::LoadFactionChangeItems()
 {
     uint32 oldMSTime = getMSTime();
@@ -8766,23 +8609,6 @@ CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry)
     if (itr != _creatureTemplateStore.end())
         return &(itr->second);
 
-    return NULL;
-}
-
-VehicleAccessoryList const* ObjectMgr::GetVehicleAccessoryList(Vehicle* veh) const
-{
-    if (Creature* cre = veh->GetBase()->ToCreature())
-    {
-        // Give preference to GUID-based accessories
-        VehicleAccessoryContainer::const_iterator itr = _vehicleAccessoryStore.find(cre->GetDBTableGUIDLow());
-        if (itr != _vehicleAccessoryStore.end())
-            return &itr->second;
-    }
-
-    // Otherwise return entry-based
-    VehicleAccessoryContainer::const_iterator itr = _vehicleTemplateAccessoryStore.find(veh->GetCreatureEntry());
-    if (itr != _vehicleTemplateAccessoryStore.end())
-        return &itr->second;
     return NULL;
 }
 

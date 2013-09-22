@@ -89,7 +89,6 @@ WorldObject* ObjectAccessor::GetWorldObject(WorldObject const& p, uint64 guid)
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_MO_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:    return GetGameObject(p, guid);
-        case HIGHGUID_VEHICLE:
         case HIGHGUID_UNIT:          return GetCreature(p, guid);
         case HIGHGUID_PET:           return GetPet(p, guid);
         case HIGHGUID_DYNAMICOBJECT: return GetDynamicObject(p, guid);
@@ -117,9 +116,6 @@ Object* ObjectAccessor::GetObjectByTypeMask(WorldObject const& p, uint64 guid, u
                 return GetGameObject(p, guid);
             break;
         case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
-            if (typemask & TYPEMASK_UNIT)
-                return GetCreature(p, guid);
             break;
         case HIGHGUID_PET:
             if (typemask & TYPEMASK_UNIT)
@@ -176,7 +172,7 @@ Creature* ObjectAccessor::GetCreatureOrPet(WorldObject const& u, uint64 guid)
     if (IS_PET_GUID(guid))
         return GetPet(u, guid);
 
-    if (IS_CRE_OR_VEH_GUID(guid))
+    if (IS_CREATURE_GUID(guid))
         return GetCreature(u, guid);
 
     return NULL;
