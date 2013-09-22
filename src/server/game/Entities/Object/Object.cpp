@@ -194,7 +194,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     if (target == this)                                      // building packet for yourself
         flags |= UPDATEFLAG_SELF;
 
-    if (flags & UPDATEFLAG_STATIONARY_POSITION)
+    if (flags & UPDATEFLAG_HASPOSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
         if (isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
@@ -226,7 +226,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         if (isType(TYPEMASK_UNIT))
         {
             if (ToUnit()->GetVictim())
-                flags |= UPDATEFLAG_HAS_TARGET;
+                flags |= UPDATEFLAG_HIGHGUID; // Need to fix for 2.4.3?
         }
     }
 
@@ -274,11 +274,11 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
 {
     ASSERT(target);
 
-    if (isType(TYPEMASK_UNIT) || isType(TYPEMASK_PLAYER))
+/*    if (isType(TYPEMASK_UNIT) || isType(TYPEMASK_PLAYER))
     {
         if (Battleground* bg = target->GetBattleground())
         {
-            if (bg->isArena())
+            if (bg->IsArena())
             {
                 WorldPacket data(SMSG_ARENA_UNIT_DESTROYED, 8);
                 data << uint64(GetGUID());
@@ -286,7 +286,7 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
             }
         }
     }
-
+*/ // Not sure what the problem is here, but let's move on for now. 2.4.3?
     WorldPacket data(SMSG_DESTROY_OBJECT, 8 + 1);
     data << uint64(GetGUID());
     //! If the following bool is true, the client will call "void CGUnit_C::OnDeath()" for this object.
@@ -366,7 +366,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
     else
     {
-        if (flags & UPDATEFLAG_POSITION)
+        if (flags & UPDATEFLAG_HASPOSITION)
         {
             Transport* transport = object->GetTransport();
 
@@ -408,7 +408,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         else
         {
             // 0x40
-            if (flags & UPDATEFLAG_STATIONARY_POSITION)
+            if (flags & UPDATEFLAG_HASPOSITION)
             {
                 *data << object->GetPositionX();
                 *data << object->GetPositionY();
@@ -421,11 +421,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         }
     }
 
-    // 0x8
+/*    // 0x8
     if (flags & UPDATEFLAG_UNKNOWN)
     {
         *data << uint32(0);
     }
+*/ // 2.4.3?
 
     // 0x10
     if (flags & UPDATEFLAG_LOWGUID)
@@ -458,7 +459,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     }
 
     // 0x4
-    if (flags & UPDATEFLAG_HAS_TARGET)
+    if (flags & UPDATEFLAG_FULLGUID)
     {
         if (Unit* victim = unit->GetVictim())
             data->append(victim->GetPackGUID());
@@ -2196,7 +2197,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             break;
     }
 
-    if (!summon->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, vehId, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
+    if (!summon->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
     {
         delete summon;
         return NULL;
@@ -2241,12 +2242,7 @@ void WorldObject::SetZoneScript()
         if (map->IsDungeon())
             m_zoneScript = (ZoneScript*)((InstanceMap*)map)->GetInstanceScript();
         else if (!map->IsBattlegroundOrArena())
-        {
-            if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
-                m_zoneScript = bf;
-            else
-                m_zoneScript = sOutdoorPvPMgr->GetZoneScript(GetZoneId());
-        }
+            m_zoneScript = sOutdoorPvPMgr->GetZoneScript(GetZoneId());
     }
 }
 

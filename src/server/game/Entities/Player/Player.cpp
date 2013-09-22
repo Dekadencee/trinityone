@@ -862,7 +862,6 @@ Player::Player(WorldSession* session): Unit(true)
     SetPendingBind(0, 0);
 
     _activeCheats = CHEAT_NONE;
-    m_achievementMgr = new AchievementMgr(this);
     m_reputationMgr = new ReputationMgr(this);
 }
 
@@ -899,7 +898,6 @@ Player::~Player()
 
     delete m_declinedname;
     delete m_runes;
-    delete m_achievementMgr;
     delete m_reputationMgr;
 
     sWorld->DecreasePlayerCount();
