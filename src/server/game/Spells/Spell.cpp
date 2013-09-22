@@ -52,7 +52,6 @@
 #include "SpellScript.h"
 #include "InstanceScript.h"
 #include "SpellInfo.h"
-#include "BattlefieldMgr.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -196,7 +195,6 @@ uint64 SpellCastTargets::GetUnitTargetGUID() const
     switch (GUID_HIPART(m_objectTargetGUID))
     {
         case HIGHGUID_PLAYER:
-        case HIGHGUID_VEHICLE:
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
             return m_objectTargetGUID;
@@ -1542,20 +1540,6 @@ void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImpli
             if (m_caster->IsSummon())
                 target = m_caster->ToTempSummon()->GetSummoner();
             break;
-        case TARGET_UNIT_VEHICLE:
-            target = m_caster->GetVehicleBase();
-            break;
-        case TARGET_UNIT_PASSENGER_0:
-        case TARGET_UNIT_PASSENGER_1:
-        case TARGET_UNIT_PASSENGER_2:
-        case TARGET_UNIT_PASSENGER_3:
-        case TARGET_UNIT_PASSENGER_4:
-        case TARGET_UNIT_PASSENGER_5:
-        case TARGET_UNIT_PASSENGER_6:
-        case TARGET_UNIT_PASSENGER_7:
-            if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsVehicle())
-                target = m_caster->GetVehicleKit()->GetPassenger(targetType.GetTarget() - TARGET_UNIT_PASSENGER_0);
-            break;
         default:
             break;
     }
@@ -1665,10 +1649,6 @@ void Spell::SelectImplicitTrajTargets()
     std::list<WorldObject*>::const_iterator itr = targets.begin();
     for (; itr != targets.end(); ++itr)
     {
-        if (Unit* unitTarget = (*itr)->ToUnit())
-            if (m_caster == *itr || m_caster->IsOnVehicle(unitTarget) || (unitTarget)->GetVehicle())//(*itr)->IsOnVehicle(m_caster))
-                continue;
-
         const float size = std::max((*itr)->GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
         /// @todo all calculation should be based on src instead of m_caster
         const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) * std::cos(m_targets.GetSrcPos()->GetRelativeAngle(*itr));
@@ -3864,9 +3844,6 @@ void Spell::SendSpellStart()
          && m_spellInfo->PowerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF;
 
-    if (m_spellInfo->RuneCostID && m_spellInfo->PowerType == POWER_RUNE)
-        castFlags |= CAST_FLAG_UNKNOWN_19;
-
     WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
     if (m_CastItem)
         data.append(m_CastItem->GetPackGUID());
@@ -3917,21 +3894,6 @@ void Spell::SendSpellGo()
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsPet()))
         && m_spellInfo->PowerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_POWER_LEFT_SELF; // should only be sent to self, but the current messaging doesn't make that possible
-
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER)
-        && (m_caster->getClass() == CLASS_DEATH_KNIGHT)
-        && m_spellInfo->RuneCostID
-        && m_spellInfo->PowerType == POWER_RUNE)
-    {
-        castFlags |= CAST_FLAG_UNKNOWN_19;                   // same as in SMSG_SPELL_START
-        castFlags |= CAST_FLAG_RUNE_LIST;                    // rune cooldowns list
-    }
-
-    if (m_spellInfo->HasEffect(SPELL_EFFECT_ACTIVATE_RUNE))
-    {
-        castFlags |= CAST_FLAG_RUNE_LIST;                    // rune cooldowns list
-        castFlags |= CAST_FLAG_UNKNOWN_19;                   // same as in SMSG_SPELL_START
-    }
 
     if (m_targets.HasTraj())
         castFlags |= CAST_FLAG_ADJUST_MISSILE;
@@ -4038,7 +4000,7 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
     {
         for (uint8 i = 0; i < 3; ++i)
         {
-            if (uint32 item_id = m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i))
+            if (uint32 item_id = m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i))
             {
                 if (ItemEntry const* itemEntry = sItemStore.LookupEntry(item_id))
                 {
@@ -4390,7 +4352,7 @@ void Spell::TakePower()
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (powerType == POWER_RAGE || powerType == POWER_ENERGY || powerType == POWER_RUNE)
+        if (powerType == POWER_RAGE || powerType == POWER_ENERGY)
             if (uint64 targetGUID = m_targets.GetUnitTargetGUID())
                 for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                     if (ihit->targetGUID == targetGUID)
@@ -4404,12 +4366,6 @@ void Spell::TakePower()
                         }
                         break;
                     }
-    }
-
-    if (powerType == POWER_RUNE)
-    {
-        TakeRunePower(hit);
-        return;
     }
 
     if (!m_powerCost)
@@ -4465,116 +4421,6 @@ void Spell::TakeAmmo()
         else if (uint32 ammo = m_caster->ToPlayer()->GetUInt32Value(PLAYER_AMMO_ID))
             m_caster->ToPlayer()->DestroyItemCount(ammo, 1, true);
     }
-}
-
-SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
-{
-    if (m_spellInfo->PowerType != POWER_RUNE || !runeCostID)
-        return SPELL_CAST_OK;
-
-    Player* player = m_caster->ToPlayer();
-    if (!player)
-        return SPELL_CAST_OK;
-
-    if (player->getClass() != CLASS_DEATH_KNIGHT)
-        return SPELL_CAST_OK;
-
-    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(runeCostID);
-    if (!src)
-        return SPELL_CAST_OK;
-
-    if (src->NoRuneCost())
-        return SPELL_CAST_OK;
-
-    int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
-
-    for (uint32 i = 0; i < RUNE_DEATH; ++i)
-    {
-        runeCost[i] = src->RuneCost[i];
-        if (Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
-    }
-
-    runeCost[RUNE_DEATH] = MAX_RUNES;                       // calculated later
-
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        RuneType rune = player->GetCurrentRune(i);
-        if ((player->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
-            runeCost[rune]--;
-    }
-
-    for (uint32 i = 0; i < RUNE_DEATH; ++i)
-        if (runeCost[i] > 0)
-            runeCost[RUNE_DEATH] += runeCost[i];
-
-    if (runeCost[RUNE_DEATH] > MAX_RUNES)
-        return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
-
-    return SPELL_CAST_OK;
-}
-
-void Spell::TakeRunePower(bool didHit)
-{
-    if (m_caster->GetTypeId() != TYPEID_PLAYER || m_caster->getClass() != CLASS_DEATH_KNIGHT)
-        return;
-
-    SpellRuneCostEntry const* runeCostData = sSpellRuneCostStore.LookupEntry(m_spellInfo->RuneCostID);
-    if (!runeCostData || (runeCostData->NoRuneCost() && runeCostData->NoRunicPowerGain()))
-        return;
-
-    Player* player = m_caster->ToPlayer();
-    m_runesState = player->GetRunesState();                 // store previous state
-
-    int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
-
-    for (uint32 i = 0; i < RUNE_DEATH; ++i)
-    {
-        runeCost[i] = runeCostData->RuneCost[i];
-        if (Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
-    }
-
-    runeCost[RUNE_DEATH] = 0;                               // calculated later
-
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        RuneType rune = player->GetCurrentRune(i);
-        if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
-        {
-            player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-            player->SetLastUsedRune(rune);
-            runeCost[rune]--;
-        }
-    }
-
-    runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
-
-    if (runeCost[RUNE_DEATH] > 0)
-    {
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            RuneType rune = player->GetCurrentRune(i);
-            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
-            {
-                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-                player->SetLastUsedRune(rune);
-                runeCost[rune]--;
-
-                // keep Death Rune type if missed
-                if (didHit)
-                    player->RestoreBaseRune(i);
-
-                if (runeCost[RUNE_DEATH] == 0)
-                    break;
-            }
-        }
-    }
-
-    // you can gain some runic power when use runes
-    if (didHit)
-        if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
-            player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
 }
 
 void Spell::TakeReagents()
@@ -5418,9 +5264,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 if (Unit* target = m_targets.GetUnitTarget())
                 {
-                    if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->IsVehicle())
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-
                     if (target->IsMounted())
                         return SPELL_FAILED_CANT_BE_CHARMED;
 
@@ -5468,18 +5311,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_FLY:
             case SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED:
-            {
-                // not allow cast fly spells if not have req. skills  (all spells is self target)
-                // allow always ghost flight spells
-                if (m_originalCaster && m_originalCaster->GetTypeId() == TYPEID_PLAYER && m_originalCaster->IsAlive())
-                {
-                    Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
-                    if (AreaTableEntry const* area = GetAreaEntryByAreaID(m_originalCaster->GetAreaId()))
-                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()))
-                            return (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
-                }
                 break;
-            }
             case SPELL_AURA_PERIODIC_MANA_LEECH:
             {
                 if (m_spellInfo->Effects[i].IsTargetingArea())
@@ -5813,14 +5645,6 @@ SpellCastResult Spell::CheckPower()
     {
         TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "Spell::CheckPower: Unknown power type '%d'", m_spellInfo->PowerType);
         return SPELL_FAILED_UNKNOWN;
-    }
-
-    //check rune cost only if a spell has PowerType == POWER_RUNE
-    if (m_spellInfo->PowerType == POWER_RUNE)
-    {
-        SpellCastResult failReason = CheckRuneCost(m_spellInfo->RuneCostID);
-        if (failReason != SPELL_CAST_OK)
-            return failReason;
     }
 
     // Check power amount
@@ -6462,8 +6286,6 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
         case SPELL_AURA_MOD_CHARM:
         case SPELL_AURA_MOD_POSSESS_PET:
         case SPELL_AURA_AOE_CHARM:
-            if (target->GetTypeId() == TYPEID_UNIT && target->IsVehicle())
-                return false;
             if (target->IsMounted())
                 return false;
             if (target->GetCharmerGUID())
