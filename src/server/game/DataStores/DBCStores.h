@@ -170,7 +170,6 @@ extern TaxiMask                                  sTaxiNodesMask;
 extern TaxiMask                                  sOldContinentsNodesMask;
 extern TaxiMask                                  sHordeTaxiNodesMask;
 extern TaxiMask                                  sAllianceTaxiNodesMask;
-extern TaxiMask                                  sDeathKnightTaxiNodesMask;
 extern TaxiPathSetBySource                       sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
 extern DBCStorage <TeamContributionPointsEntry>  sTeamContributionPointsStore;
