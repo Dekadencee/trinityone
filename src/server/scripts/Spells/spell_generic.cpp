@@ -1571,9 +1571,6 @@ class spell_gen_gift_of_naaru : public SpellScriptLoader
                         break;
                     case SPELLFAMILY_WARRIOR:
                     case SPELLFAMILY_HUNTER:
-                    case SPELLFAMILY_DEATHKNIGHT:
-                        heal = 1.1f * float(std::max(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK), GetCaster()->GetTotalAttackPowerValue(RANGED_ATTACK)));
-                        break;
                     case SPELLFAMILY_GENERIC:
                     default:
                         break;

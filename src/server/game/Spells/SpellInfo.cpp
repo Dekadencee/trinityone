@@ -1951,10 +1951,6 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             break;
         }
-        case SPELLFAMILY_DEATHKNIGHT:
-            if (Id == 48266 || Id == 48263 || Id == 48265)
-                return SPELL_SPECIFIC_PRESENCE;
-            break;
     }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)

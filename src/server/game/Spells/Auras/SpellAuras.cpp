@@ -1283,49 +1283,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (target->HasAura(58039)) // Glyph of Blurred Speed
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
                 break;
-            case SPELLFAMILY_DEATHKNIGHT:
-                if (!caster)
-                    break;
-                // Frost Fever and Blood Plague
-                if (GetSpellInfo()->SpellFamilyFlags[2] & 0x2)
-                {
-                    // Can't proc on self
-                    if (GetCasterGUID() == target->GetGUID())
-                        break;
-
-                    AuraEffect* aurEff = NULL;
-                    // Ebon Plaguebringer / Crypt Fever
-                    Unit::AuraEffectList const& TalentAuras = caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for (Unit::AuraEffectList::const_iterator itr = TalentAuras.begin(); itr != TalentAuras.end(); ++itr)
-                    {
-                        if ((*itr)->GetMiscValue() == 7282)
-                        {
-                            aurEff = *itr;
-                            // Ebon Plaguebringer - end search if found
-                            if ((*itr)->GetSpellInfo()->SpellIconID == 1766)
-                                break;
-                        }
-                    }
-                    if (aurEff)
-                    {
-                        uint32 spellId = 0;
-                        switch (aurEff->GetId())
-                        {
-                            // Ebon Plague
-                            case 51161: spellId = 51735; break;
-                            case 51160: spellId = 51734; break;
-                            case 51099: spellId = 51726; break;
-                            // Crypt Fever
-                            case 49632: spellId = 50510; break;
-                            case 49631: spellId = 50509; break;
-                            case 49032: spellId = 50508; break;
-                            default:
-                                TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "Aura::HandleAuraSpecificMods: Unknown rank of Crypt Fever/Ebon Plague (%d) found", aurEff->GetId());
-                        }
-                        caster->CastSpell(target, spellId, true, 0, GetEffect(0));
-                    }
-                }
-                break;
         }
     }
     // mods at aura remove
@@ -1541,23 +1498,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
                 if (GetId() == 25771 && target->HasAura(61988) && !target->HasAura(61987))
                     target->RemoveAura(61988);
-                break;
-            case SPELLFAMILY_DEATHKNIGHT:
-                // Blood of the North
-                // Reaping
-                // Death Rune Mastery
-                if (GetSpellInfo()->SpellIconID == 3041 || GetSpellInfo()->SpellIconID == 22 || GetSpellInfo()->SpellIconID == 2622)
-                {
-                    if (!GetEffect(0) || GetEffect(0)->GetAuraType() != SPELL_AURA_PERIODIC_DUMMY)
-                        break;
-                    if (target->GetTypeId() != TYPEID_PLAYER)
-                        break;
-                    if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
-                        break;
-
-                     // aura removed - remove death runes
-                    target->ToPlayer()->RemoveRunesByAuraEffect(GetEffect(0));
-                }
                 break;
             case SPELLFAMILY_HUNTER:
                 // Glyph of Freezing Trap

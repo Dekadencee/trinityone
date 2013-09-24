@@ -640,19 +640,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
                 break;
             }
-            case SPELLFAMILY_DEATHKNIGHT:
-            {
-                // Blood Boil - bonus for diseased targets
-                if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
-                {
-                    if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
-                    {
-                        damage += m_damage / 2;
-                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
-                    }
-                }
-                break;
-            }
             case SPELLFAMILY_MAGE:
             {
                 // Deep Freeze should deal damage to permanently stun-immune targets.
@@ -720,41 +707,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     // now let next effect cast spell at each target.
                     return;
                 }
-            }
-            break;
-        case SPELLFAMILY_DEATHKNIGHT:
-            switch (m_spellInfo->Id)
-            {
-                case 46584: // Raise Dead
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Do we have talent Master of Ghouls?
-                    if (m_caster->HasAura(52143))
-                        // summon as pet
-                        bp = 52150;
-                    else
-                        // or guardian
-                        bp = 46585;
-
-                    if (m_targets.HasDst())
-                        targets.SetDst(*m_targets.GetDstPos());
-                    else
-                    {
-                        targets.SetDst(*m_caster);
-                        // Corpse not found - take reagents (only not triggered cast can take them)
-                        triggered = false;
-                    }
-                    // Remove cooldown - summon spellls have category
-                    m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                    spell_id = 48289;
-                    break;
-                // Raise dead - take reagents and trigger summon spells
-                case 48289:
-                    if (m_targets.HasDst())
-                        targets.SetDst(*m_targets.GetDstPos());
-                    spell_id = CalculateDamage(0, NULL);
-                    break;
             }
             break;
     }
@@ -1504,10 +1456,7 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                 }
             }
         }
-        // Death Pact - return pct of max health to caster
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
-            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
-        else
+        else //TODO - I think this needs to be revisited (was 3.3.5a)
             addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
 
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
@@ -4045,26 +3994,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 if (spellId2)
                     m_caster->CastSpell(unitTarget, spellId2, true);
                 return;
-            }
-            break;
-        }
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            // Pestilence
-            if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
-            {
-                // Get diseases on target of spell
-                if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
-                {
-                    // And spread them on target
-                    // Blood Plague
-                    if (m_targets.GetUnitTarget()->GetAura(55078))
-                        m_caster->CastSpell(unitTarget, 55078, true);
-                    // Frost Fever
-                    if (m_targets.GetUnitTarget()->GetAura(55095))
-                        m_caster->CastSpell(unitTarget, 55095, true);
-                }
             }
             break;
         }

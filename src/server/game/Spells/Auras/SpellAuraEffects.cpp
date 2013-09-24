@@ -863,21 +863,6 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                     if (GetId() == 55342)// Mirror Image
                         m_isPeriodic = false;
                     break;
-                case SPELLFAMILY_DEATHKNIGHT:
-                    // Chains of Ice
-                    if (GetSpellInfo()->SpellFamilyFlags[1] & 0x00004000)
-                    {
-                        // Get 0 effect aura
-                        if (AuraEffect* slow = GetBase()->GetEffect(0))
-                        {
-                            int32 newAmount = slow->GetAmount() + GetAmount();
-                            if (newAmount > 0)
-                                newAmount = 0;
-                            slow->ChangeAmount(newAmount);
-                        }
-                        return;
-                    }
-                    break;
                 default:
                     break;
            }
@@ -4670,14 +4655,9 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                                 target->CastSpell(target, 58601, true);
                             break;
+						default:
+							break;
                     }
-                    break;
-                case SPELLFAMILY_DEATHKNIGHT:
-                    // Summon Gargoyle (Dismiss Gargoyle at remove)
-                    if (GetId() == 61777)
-                        target->CastSpell(target, GetAmount(), true);
-                    break;
-                default:
                     break;
             }
         }
@@ -4835,12 +4815,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             // if (!(mode & AURA_EFFECT_HANDLE_REAL))
             //    break;
             break;
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            //if (!(mode & AURA_EFFECT_HANDLE_REAL))
-            //    break;
-            break;
-        }
     }
 }
 
@@ -5292,31 +5266,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
                     target->RemoveAurasDueToSpell(52179);
                 break;
-            }
-            break;
-        case SPELLFAMILY_DEATHKNIGHT:
-            switch (GetId())
-            {
-                case 49016: // Hysteria
-                    uint32 damage = uint32(target->CountPctFromMaxHealth(1));
-                    target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    break;
-            }
-            // Death and Decay
-            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x20)
-            {
-                if (caster)
-                    caster->CastCustomSpell(target, 52212, &m_amount, NULL, NULL, true, 0, this);
-                break;
-            }
-            // Blood of the North
-            // Reaping
-            // Death Rune Mastery
-            if (GetSpellInfo()->SpellIconID == 3041 || GetSpellInfo()->SpellIconID == 22 || GetSpellInfo()->SpellIconID == 2622)
-            {
-                if (target->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
             }
             break;
         default:
