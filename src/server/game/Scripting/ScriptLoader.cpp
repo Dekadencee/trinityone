@@ -25,7 +25,6 @@ void AddSC_example_misc();
 void AddSC_example_commandscript();
 
 // spells
-void AddSC_deathknight_spell_scripts();
 void AddSC_druid_spell_scripts();
 void AddSC_generic_spell_scripts();
 void AddSC_hunter_spell_scripts();
@@ -654,7 +653,6 @@ void AddSC_zangarmarsh();
 void AddSC_event_childrens_week();
 
 // Pets
-void AddSC_deathknight_pet_scripts();
 void AddSC_generic_pet_scripts();
 void AddSC_hunter_pet_scripts();
 void AddSC_mage_pet_scripts();
@@ -707,7 +705,6 @@ void AddExampleScripts()
 
 void AddSpellScripts()
 {
-    AddSC_deathknight_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();
     AddSC_hunter_spell_scripts();
@@ -1361,7 +1358,6 @@ void AddEventScripts()
 void AddPetScripts()
 {
 #ifdef SCRIPTS
-    AddSC_deathknight_pet_scripts();
     AddSC_generic_pet_scripts();
     AddSC_hunter_pet_scripts();
     AddSC_mage_pet_scripts();
