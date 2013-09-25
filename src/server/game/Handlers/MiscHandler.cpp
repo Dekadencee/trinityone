@@ -932,6 +932,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         player->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation, TELE_TO_NOT_LEAVE_TRANSPORT);
 }
 
+/*
 void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
@@ -986,6 +987,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
     data << uint32(0);
     SendPacket(&data);
 }
+*/ // Can this be rewritten for 2.4.3 
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 {
@@ -1633,7 +1635,9 @@ void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
     player->SendRespondInspectAchievements(_player);
 }
 
-void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& /*recvData*/)
+
+//void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& /*recvData*/)
+/*
 {
     // empty opcode
     TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: CMSG_WORLD_STATE_UI_TIMER_UPDATE");
@@ -1642,6 +1646,7 @@ void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& /*recvData*/)
     data << uint32(time(NULL));
     SendPacket(&data);
 }
+*/ // Doesn't exist in 2.4.3. Do we need a replacement?
 
 void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
 {
@@ -1651,12 +1656,6 @@ void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
     SendAccountDataTimes(GLOBAL_CACHE_MASK);
 }
 
-void WorldSession::SendSetPhaseShift(uint32 PhaseShift)
-{
-    WorldPacket data(SMSG_SET_PHASE_SHIFT, 4);
-    data << uint32(PhaseShift);
-    SendPacket(&data);
-}
 // Battlefield and Battleground
 void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 {

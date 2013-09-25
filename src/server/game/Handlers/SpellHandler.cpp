@@ -644,6 +644,7 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
     SendPacket(&data);
 }
 
+/*
 void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: CMSG_UPDATE_PROJECTILE_POSITION");
@@ -680,3 +681,4 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
     data << float(z);
     caster->SendMessageToSet(&data, true);
 }
+*/ // How was this handled in 2.4.3

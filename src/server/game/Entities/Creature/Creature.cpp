@@ -2400,7 +2400,8 @@ bool Creature::SetWalk(bool enable)
     return true;
 }
 
-bool Creature::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
+//bool Creature::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
+/*
 {
     //! It's possible only a packet is sent but moveflags are not updated
     //! Need more research on this
@@ -2415,6 +2416,8 @@ bool Creature::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
     SendMessageToSet(&data, false);
     return true;
 }
+*/ // Rewrite for 2.4.3
+
 
 bool Creature::SetSwim(bool enable)
 {

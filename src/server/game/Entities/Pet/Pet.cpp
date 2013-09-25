@@ -1506,6 +1506,7 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
     return true;
 }
 
+/*
 bool Pet::learnSpell(uint32 spell_id)
 {
     // prevent duplicated entires in spell book
@@ -1521,6 +1522,7 @@ bool Pet::learnSpell(uint32 spell_id)
     }
     return true;
 }
+*/ // Rewrite for 2.4.3 MrSmite better be willing to help with pets :P
 
 void Pet::InitLevelupSpellsForLevel()
 {
@@ -1561,6 +1563,7 @@ void Pet::InitLevelupSpellsForLevel()
     }
 }
 
+/*
 bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {
     if (removeSpell(spell_id, learn_prev, clear_ab))
@@ -1575,6 +1578,7 @@ bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
     }
     return false;
 }
+*/ // Rewrite for 2.4.3
 
 bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {

@@ -4968,10 +4968,6 @@ void Player::SetMovement(PlayerMovementType pType)
 */
 void Player::BuildPlayerRepop()
 {
-    WorldPacket data(SMSG_PRE_RESURRECT, GetPackGUID().size());
-    data.append(GetPackGUID());
-    GetSession()->SendPacket(&data);
-
     if (getRace() == RACE_NIGHTELF)
         CastSpell(this, 20584, true);
     CastSpell(this, 8326, true);
@@ -6687,12 +6683,14 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
     SendDirectMessage(&data);
 }
 
+/*
 void Player::SendMovieStart(uint32 MovieId)
 {
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
     data << uint32(MovieId);
     SendDirectMessage(&data);
 }
+*/ // I don't think this existed in 2.4.3
 
 void Player::CheckAreaExploreAndOutdoor()
 {
@@ -16393,6 +16391,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uin
         SetQuestSlotCounter(log_slot, creatureOrGO_idx, GetQuestSlotCounter(log_slot, creatureOrGO_idx)+add_count);
 }
 
+/*
 void Player::SendQuestUpdateAddPlayer(Quest const* quest, uint16 old_count, uint16 add_count)
 {
     ASSERT(old_count + add_count < 65536 && "player count store in 16 bits");
@@ -16408,6 +16407,7 @@ void Player::SendQuestUpdateAddPlayer(Quest const* quest, uint16 old_count, uint
     if (log_slot < MAX_QUEST_LOG_SIZE)
         SetQuestSlotCounter(log_slot, QUEST_PVP_KILL_SLOT, GetQuestSlotCounter(log_slot, QUEST_PVP_KILL_SLOT) + add_count);
 }
+*/ // I don't think this existed in 2.4.3
 
 bool Player::HasPvPForcingQuest() const
 {
@@ -19611,6 +19611,7 @@ void Player::SendDungeonDifficulty(bool IsInGroup)
     GetSession()->SendPacket(&data);
 }
 
+/*
 void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
 {
     uint8 val = 0x00000001;
@@ -19620,6 +19621,7 @@ void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
     data << uint32(IsInGroup);
     GetSession()->SendPacket(&data);
 }
+*/ // 2.4.3? If so -- rewrite
 
 void Player::SendResetFailedNotify(uint32 mapid)
 {
@@ -21931,6 +21933,7 @@ Player* Player::GetSelectedPlayer() const
     return NULL;
 }
 
+/*
 void Player::SendComboPoints()
 {
     Unit* combotarget = ObjectAccessor::GetUnit(*this, m_comboTarget);
@@ -21949,6 +21952,7 @@ void Player::SendComboPoints()
         GetSession()->SendPacket(&data);
     }
 }
+*/ // Research - not in 2.4.3
 
 void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
 {
@@ -22427,14 +22431,15 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     }
 }
 
+/*
 void Player::SendAurasForTarget(Unit* target)
 {
     if (!target || target->GetVisibleAuras()->empty())                  // speedup things
         return;
 
-    /*! Blizz sends certain movement packets sometimes even before CreateObject
-        These movement packets are usually found in SMSG_COMPRESSED_MOVES
-    */
+//     Blizz sends certain movement packets sometimes even before CreateObject
+//        These movement packets are usually found in SMSG_COMPRESSED_MOVES
+//    
     if (target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         target->SetFeatherFall(true, true);
 
@@ -22456,6 +22461,7 @@ void Player::SendAurasForTarget(Unit* target)
 
     GetSession()->SendPacket(&data);
 }
+*/ // Not sure about 2.4.3
 
 void Player::SetDailyQuestStatus(uint32 quest_id)
 {
@@ -24582,6 +24588,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
     }
 }
 
+/*
 void Player::SendTalentsInfoData(bool pet)
 {
     WorldPacket data(SMSG_TALENTS_INFO, 50);
@@ -24592,6 +24599,7 @@ void Player::SendTalentsInfoData(bool pet)
         BuildPlayerTalentsInfoData(&data);
     GetSession()->SendPacket(&data);
 }
+*/ // 2.4.3?
 
 void Player::BuildEnchantmentsInfoData(WorldPacket* data)
 {
@@ -24636,6 +24644,7 @@ void Player::BuildEnchantmentsInfoData(WorldPacket* data)
     data->put<uint32>(slotUsedMaskPos, slotUsedMask);
 }
 
+/*
 void Player::SendEquipmentSetList()
 {
     uint32 count = 0;
@@ -24664,7 +24673,9 @@ void Player::SendEquipmentSetList()
     data.put<uint32>(count_pos, count);
     GetSession()->SendPacket(&data);
 }
+*/ // Not sure about 2.4.3
 
+/*
 void Player::SetEquipmentSet(uint32 index, EquipmentSet eqset)
 {
     if (eqset.Guid != 0)
@@ -24705,6 +24716,7 @@ void Player::SetEquipmentSet(uint32 index, EquipmentSet eqset)
 
     eqslot.state = old_state == EQUIPMENT_SET_NEW ? EQUIPMENT_SET_NEW : EQUIPMENT_SET_CHANGED;
 }
+*/ // Research for 2.4.3
 
 void Player::_SaveEquipmentSets(SQLTransaction& trans)
 {
@@ -24932,55 +24944,6 @@ void Player::AddRefundReference(uint32 it)
     m_refundableItems.insert(it);
 }
 
-void Player::DeleteRefundReference(uint32 it)
-{
-    std::set<uint32>::iterator itr = m_refundableItems.find(it);
-    if (itr != m_refundableItems.end())
-    {
-        m_refundableItems.erase(itr);
-    }
-}
-
-void Player::SendRefundInfo(Item* item)
-{
-    // This function call unsets ITEM_FLAGS_REFUNDABLE if played time is over 2 hours.
-    item->UpdatePlayedTime(this);
-
-    if (!item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: item not refundable!");
-        return;
-    }
-
-    if (GetGUIDLow() != item->GetRefundRecipient()) // Formerly refundable item got traded
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: item was traded!");
-        item->SetNotRefundable(this);
-        return;
-    }
-
-    ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
-    if (!iece)
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: cannot find extendedcost data.");
-        return;
-    }
-
-    WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
-    data << uint64(item->GetGUID());                    // item guid
-    data << uint32(item->GetPaidMoney());               // money cost
-    data << uint32(iece->reqhonorpoints);               // honor point cost
-    data << uint32(iece->reqarenapoints);               // arena point cost
-    for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i)                       // item cost data
-    {
-        data << uint32(iece->reqitem[i]);
-        data << uint32(iece->reqitemcount[i]);
-    }
-    data << uint32(0);
-    data << uint32(GetTotalPlayedTime() - item->GetPlayedTime());
-    GetSession()->SendPacket(&data);
-}
-
 bool Player::AddItem(uint32 itemId, uint32 count)
 {
     uint32 noSpaceForCount = 0;
@@ -25002,121 +24965,6 @@ bool Player::AddItem(uint32 itemId, uint32 count)
     else
         return false;
     return true;
-}
-
-void Player::RefundItem(Item* item)
-{
-    if (!item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: item not refundable!");
-        return;
-    }
-
-    if (item->IsRefundExpired())    // item refund has expired
-    {
-        item->SetNotRefundable(this);
-        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4);
-        data << uint64(item->GetGUID());             // Guid
-        data << uint32(10);                          // Error!
-        GetSession()->SendPacket(&data);
-        return;
-    }
-
-    if (GetGUIDLow() != item->GetRefundRecipient()) // Formerly refundable item got traded
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: item was traded!");
-        item->SetNotRefundable(this);
-        return;
-    }
-
-    ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
-    if (!iece)
-    {
-        TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "Item refund: cannot find extendedcost data.");
-        return;
-    }
-
-    bool store_error = false;
-    for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i)
-    {
-        uint32 count = iece->reqitemcount[i];
-        uint32 itemid = iece->reqitem[i];
-
-        if (count && itemid)
-        {
-            ItemPosCountVec dest;
-            InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, count);
-            if (msg != EQUIP_ERR_OK)
-            {
-                store_error = true;
-                break;
-            }
-         }
-    }
-
-    if (store_error)
-    {
-        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4);
-        data << uint64(item->GetGUID());                 // Guid
-        data << uint32(10);                              // Error!
-        GetSession()->SendPacket(&data);
-        return;
-    }
-
-    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4+4+4+4+4*4+4*4);
-    data << uint64(item->GetGUID());                    // item guid
-    data << uint32(0);                                  // 0, or error code
-    data << uint32(item->GetPaidMoney());               // money cost
-    data << uint32(iece->reqhonorpoints);               // honor point cost
-    data << uint32(iece->reqarenapoints);               // arena point cost
-    for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i) // item cost data
-    {
-        data << uint32(iece->reqitem[i]);
-        data << uint32(iece->reqitemcount[i]);
-    }
-    GetSession()->SendPacket(&data);
-
-    uint32 moneyRefund = item->GetPaidMoney();  // item-> will be invalidated in DestroyItem
-
-    // Save all relevant data to DB to prevent desynchronisation exploits
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-    // Delete any references to the refund data
-    item->SetNotRefundable(this, true, &trans);
-
-    // Destroy item
-    DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-    // Grant back extendedcost items
-    for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i)
-    {
-        uint32 count = iece->reqitemcount[i];
-        uint32 itemid = iece->reqitem[i];
-        if (count && itemid)
-        {
-            ItemPosCountVec dest;
-            InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, count);
-            ASSERT(msg == EQUIP_ERR_OK); /// Already checked before
-            Item* it = StoreNewItem(dest, itemid, true);
-            SendNewItem(it, count, true, false, true);
-        }
-    }
-
-    // Grant back money
-    if (moneyRefund)
-        ModifyMoney(moneyRefund); // Saved in SaveInventoryAndGoldToDB
-
-    // Grant back Honor points
-    if (uint32 honorRefund = iece->reqhonorpoints)
-        ModifyHonorPoints(honorRefund, &trans);
-
-    // Grant back Arena points
-    if (uint32 arenaRefund = iece->reqarenapoints)
-        ModifyArenaPoints(arenaRefund, &trans);
-
-    SaveInventoryAndGoldToDB(trans);
-
-    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Player::SetRandomWinner(bool isWinner)
@@ -25200,7 +25048,8 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
     return false;
 }
 
-bool Player::SetDisableGravity(bool disable, bool packetOnly /*= false*/)
+//bool Player::SetDisableGravity(bool disable, bool packetOnly /*= false*/)
+/*
 {
     if (!packetOnly && !Unit::SetDisableGravity(disable))
         return false;
@@ -25216,6 +25065,7 @@ bool Player::SetDisableGravity(bool disable, bool packetOnly /*= false*/)
     SendMessageToSet(&data, false);
     return true;
 }
+*/ // Need rewrite for 2.4.3
 
 bool Player::SetCanFly(bool apply)
 {

@@ -803,7 +803,9 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
     SendPacket(&data);
 }
 
-void WorldSession::HandleQueryQuestsCompleted(WorldPacket & /*recvData*/)
+
+//void WorldSession::HandleQueryQuestsCompleted(WorldPacket & /*recvData*/)
+/*
 {
     size_t rew_count = _player->GetRewardedQuestCount();
 
@@ -816,3 +818,4 @@ void WorldSession::HandleQueryQuestsCompleted(WorldPacket & /*recvData*/)
 
     SendPacket(&data);
 }
+*/ // 2.4.3?

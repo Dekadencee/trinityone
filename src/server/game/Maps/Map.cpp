@@ -2446,6 +2446,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                             return false;
                         }
                         // if the group/leader is permanently bound to the instance
+                        /*
                         // players also become permanently bound when they enter
                         if (groupBind->perm)
                         {
@@ -2456,6 +2457,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                             player->GetSession()->SendPacket(&data);
                             player->SetPendingBind(mapSave->GetInstanceId(), 60000);
                         }
+                        */ // 2.4.3 more research on how this was done in 2.4.3
                     }
                 }
                 else

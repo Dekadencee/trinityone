@@ -17,7 +17,6 @@
  */
 
 #include "AccountMgr.h"
-#include "CalendarMgr.h"
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -1603,8 +1602,6 @@ void Guild::HandleLeaveMember(WorldSession* session)
         SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_COMMAND_SUCCESS, m_name);
     }
 
-    sCalendarMgr->RemovePlayerGuildEventsAndSignups(player->GetGUID(), GetId());
-
     if (disband)
         delete this;
 }
@@ -2171,6 +2168,7 @@ void Guild::BroadcastPacket(WorldPacket* packet) const
             player->GetSession()->SendPacket(packet);
 }
 
+/*
 void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 maxLevel, uint32 minRank)
 {
     uint32 count = 0;
@@ -2203,6 +2201,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
 
     session->SendPacket(&data);
 }
+*/ // Needs rewrite, or not needed for 2.4.3?
 
 // Members handling
 bool Guild::AddMember(uint64 guid, uint8 rankId)

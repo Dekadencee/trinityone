@@ -228,7 +228,8 @@ void WorldSession::HandleReportLag(WorldPacket& recvData)
     CharacterDatabase.Execute(stmt);
 }
 
-void WorldSession::HandleGMResponseResolve(WorldPacket& /*recvPacket*/)
+//void WorldSession::HandleGMResponseResolve(WorldPacket& /*recvPacket*/)
+/*
 {
     // empty packet
     if (GmTicket* ticket = sTicketMgr->GetTicketByPlayer(GetPlayer()->GetGUID()))
@@ -249,3 +250,4 @@ void WorldSession::HandleGMResponseResolve(WorldPacket& /*recvPacket*/)
         sTicketMgr->SendTicket(this, NULL);
     }
 }
+*/ // Rewrite for 2.4.3

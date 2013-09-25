@@ -726,6 +726,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
     SendPacket(&data);
 }
 
+/*
 void WorldSession::HandleAuctionListPendingSales(WorldPacket& recvData)
 {
     TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_AUCTION_LIST_PENDING_SALES");
@@ -736,13 +737,14 @@ void WorldSession::HandleAuctionListPendingSales(WorldPacket& recvData)
 
     WorldPacket data(SMSG_AUCTION_LIST_PENDING_SALES, 4);
     data << uint32(count);                                  // count
-    /*for (uint32 i = 0; i < count; ++i)
-    {
-        data << "";                                         // string
-        data << "";                                         // string
-        data << uint32(0);
-        data << uint32(0);
-        data << float(0);
-    }*/
+    //for (uint32 i = 0; i < count; ++i)
+    //{
+    //    data << "";                                         // string
+    //    data << "";                                         // string
+    //    data << uint32(0);
+    //    data << uint32(0);
+    //    data << float(0);
+    }
     SendPacket(&data);
 }
+*/ // 2.4.3?
