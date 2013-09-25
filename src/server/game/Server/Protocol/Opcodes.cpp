@@ -439,117 +439,6 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x19A*/ { "SMSG_QUESTUPDATE_ADD_ITEM",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x19B*/ { "CMSG_QUEST_CONFIRM_ACCEPT",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestConfirmAccept        },
     /*0x19C*/ { "SMSG_QUEST_CONFIRM_ACCEPT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x19D*/ { "CMSG_PUSHQUESTTOPARTY",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushToParty          },
-    /*0x19E*/ { "CMSG_LIST_INVENTORY",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode       },
-    /*0x19F*/ { "SMSG_LIST_INVENTORY",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1A0*/ { "CMSG_SELL_ITEM",                               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode            },
-    /*0x1A1*/ { "SMSG_SELL_ITEM",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1A2*/ { "CMSG_BUY_ITEM",                                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode             },
-    /*0x1A3*/ { "CMSG_BUY_ITEM_IN_SLOT",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemInSlotOpcode       },
-    /*0x1A4*/ { "SMSG_BUY_ITEM",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1A5*/ { "SMSG_BUY_FAILED",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1A6*/ { "CMSG_TAXICLEARALLNODES",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1A7*/ { "CMSG_TAXIENABLEALLNODES",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1A8*/ { "CMSG_TAXISHOWNODES",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1A9*/ { "SMSG_SHOWTAXINODES",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1AA*/ { "CMSG_TAXINODE_STATUS_QUERY",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNodeStatusQueryOpcode },
-    /*0x1AB*/ { "SMSG_TAXINODE_STATUS",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1AC*/ { "CMSG_TAXIQUERYAVAILABLENODES",                 STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodesOpcode},
-    /*0x1AD*/ { "CMSG_ACTIVATETAXI",                            STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiOpcode        },
-    /*0x1AE*/ { "SMSG_ACTIVATETAXIREPLY",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1AF*/ { "SMSG_NEW_TAXI_PATH",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B0*/ { "CMSG_TRAINER_LIST",                            STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTrainerListOpcode         },
-    /*0x1B1*/ { "SMSG_TRAINER_LIST",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B2*/ { "CMSG_TRAINER_BUY_SPELL",                       STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTrainerBuySpellOpcode     },
-    /*0x1B3*/ { "SMSG_TRAINER_BUY_SUCCEEDED",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B4*/ { "SMSG_TRAINER_BUY_FAILED",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B5*/ { "CMSG_BINDER_ACTIVATE",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleBinderActivateOpcode      },
-    /*0x1B6*/ { "SMSG_PLAYERBINDERROR",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B7*/ { "CMSG_BANKER_ACTIVATE",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleBankerActivateOpcode      },
-    /*0x1B8*/ { "SMSG_SHOW_BANK",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1B9*/ { "CMSG_BUY_BANK_SLOT",                           STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleBuyBankSlotOpcode         },
-    /*0x1BA*/ { "SMSG_BUY_BANK_SLOT_RESULT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1BB*/ { "CMSG_PETITION_SHOWLIST",                       STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionShowListOpcode    },
-    /*0x1BC*/ { "SMSG_PETITION_SHOWLIST",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1BD*/ { "CMSG_PETITION_BUY",                            STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionBuyOpcode         },
-    /*0x1BE*/ { "CMSG_PETITION_SHOW_SIGNATURES",                STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionShowSignOpcode    },
-    /*0x1BF*/ { "SMSG_PETITION_SHOW_SIGNATURES",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1C0*/ { "CMSG_PETITION_SIGN",                           STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionSignOpcode        },
-    /*0x1C1*/ { "SMSG_PETITION_SIGN_RESULTS",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1C2*/ { "MSG_PETITION_DECLINE",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionDeclineOpcode     },
-    /*0x1C3*/ { "CMSG_OFFER_PETITION",                          STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleOfferPetitionOpcode       },
-    /*0x1C4*/ { "CMSG_TURN_IN_PETITION",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTurnInPetitionOpcode      },
-    /*0x1C5*/ { "SMSG_TURN_IN_PETITION_RESULTS",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1C6*/ { "CMSG_PETITION_QUERY",                          STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePetitionQueryOpcode       },
-    /*0x1C7*/ { "SMSG_PETITION_QUERY_RESPONSE",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1C8*/ { "SMSG_FISH_NOT_HOOKED",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1C9*/ { "SMSG_FISH_ESCAPED",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1CA*/ { "CMSG_BUG",                                     STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleBugOpcode                 },
-    /*0x1CB*/ { "SMSG_NOTIFICATION",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1CC*/ { "CMSG_PLAYED_TIME",                             STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandlePlayedTime                },
-    /*0x1CD*/ { "SMSG_PLAYED_TIME",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1CE*/ { "CMSG_QUERY_TIME",                              STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleQueryTimeOpcode           },
-    /*0x1CF*/ { "SMSG_QUERY_TIME_RESPONSE",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D0*/ { "SMSG_LOG_XPGAIN",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D1*/ { "SMSG_AURACASTLOG",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D2*/ { "CMSG_RECLAIM_CORPSE",                          STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleCorpseReclaimOpcode       },
-    /*0x1D3*/ { "CMSG_WRAP_ITEM",                               STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleWrapItemOpcode            },
-    /*0x1D4*/ { "SMSG_LEVELUP_INFO",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D5*/ { "MSG_MINIMAP_PING",                             STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMinimapPingOpcode         },
-    /*0x1D6*/ { "SMSG_RESISTLOG",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D7*/ { "SMSG_ENCHANTMENTLOG",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1D8*/ { "CMSG_SET_SKILL_CHEAT",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1D9*/ { "SMSG_START_MIRROR_TIMER",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1DA*/ { "SMSG_PAUSE_MIRROR_TIMER",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1DB*/ { "SMSG_STOP_MIRROR_TIMER",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1DC*/ { "CMSG_PING",                                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            },
-    /*0x1DD*/ { "SMSG_PONG",                                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1DE*/ { "SMSG_CLEAR_COOLDOWN",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1DF*/ { "SMSG_GAMEOBJECT_PAGETEXT",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1E0*/ { "CMSG_SETSHEATHED",                             STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleSetSheathedOpcode         },
-    /*0x1E1*/ { "SMSG_COOLDOWN_CHEAT",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1E2*/ { "SMSG_SPELL_DELAYED",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1E3*/ { "CMSG_PLAYER_MACRO_OBSOLETE",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1E4*/ { "SMSG_PLAYER_MACRO_OBSOLETE",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1E5*/ { "CMSG_GHOST",                                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1E6*/ { "CMSG_GM_INVIS",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1E7*/ { "SMSG_INVALID_PROMOTION_CODE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1E8*/ { "MSG_GM_BIND_OTHER",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1E9*/ { "MSG_GM_SUMMON",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1EA*/ { "SMSG_ITEM_TIME_UPDATE",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1EB*/ { "SMSG_ITEM_ENCHANT_TIME_UPDATE",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1EC*/ { "SMSG_AUTH_CHALLENGE",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1ED*/ { "CMSG_AUTH_SESSION",                            STATUS_NEVER,    PROCESS_THREADSAFE,   &WorldSession::Handle_EarlyProccess            },
-    /*0x1EE*/ { "SMSG_AUTH_RESPONSE",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1EF*/ { "MSG_GM_SHOWLABEL",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1F0*/ { "CMSG_PET_CAST_SPELL",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode        },
-    /*0x1F1*/ { "MSG_SAVE_GUILD_EMBLEM",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildSaveEmblemOpcode     },
-    /*0x1F2*/ { "MSG_TABARDVENDOR_ACTIVATE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleTabardVendorActivateOpcode},
-    /*0x1F3*/ { "SMSG_PLAY_SPELL_VISUAL",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F4*/ { "CMSG_ZONEUPDATE",                              STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleZoneUpdateOpcode          },
-    /*0x1F5*/ { "SMSG_PARTYKILLLOG",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F6*/ { "SMSG_COMPRESSED_UPDATE_OBJECT",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F7*/ { "SMSG_PLAY_SPELL_IMPACT",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F8*/ { "SMSG_EXPLORATION_EXPERIENCE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F9*/ { "CMSG_GM_SET_SECURITY_GROUP",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1FA*/ { "CMSG_GM_NUKE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1FB*/ { "MSG_RANDOM_ROLL",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRandomRollOpcode          },
-    /*0x1FC*/ { "SMSG_ENVIRONMENTALDAMAGELOG",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1FD*/ { "CMSG_RWHOIS_OBSOLETE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1FE*/ { "SMSG_RWHOIS",                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1FF*/ { "MSG_LOOKING_FOR_GROUP",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLookingForGroup           },
-    /*0x200*/ { "CMSG_SET_LOOKING_FOR_GROUP",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetLfgOpcode              },
-    /*0x201*/ { "CMSG_UNLEARN_SPELL",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x202*/ { "CMSG_UNLEARN_SKILL",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode        },
-    /*0x203*/ { "SMSG_REMOVED_SPELL",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x204*/ { "CMSG_DECHARGE",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x205*/ { "CMSG_GMTICKET_CREATE",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketCreateOpcode      },
-    /*0x206*/ { "SMSG_GMTICKET_CREATE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x207*/ { "CMSG_GMTICKET_UPDATETEXT",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketUpdateOpcode      },
-    /*0x208*/ { "SMSG_GMTICKET_UPDATETEXT",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x209*/ { "SMSG_ACCOUNT_DATA_TIMES",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x20A*/ { "CMSG_REQUEST_ACCOUNT_DATA",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRequestAccountData        },
-    /*0x20B*/ { "CMSG_UPDATE_ACCOUNT_DATA",                     STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT,PROCESS_THREADUNSAFE,&WorldSession::HandleUpdateAccountData},
     /*0x20C*/ { "SMSG_UPDATE_ACCOUNT_DATA",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x20D*/ { "SMSG_CLEAR_FAR_SIGHT_IMMEDIATE",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x20E*/ { "SMSG_POWERGAINLOG_OBSOLETE",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -594,11 +483,11 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x235*/ { "CMSG_GUILD_SET_OFFICER_NOTE",                  STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildSetOfficerNoteOpcode },
     /*0x236*/ { "SMSG_LOGIN_VERIFY_WORLD",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x237*/ { "CMSG_CLEAR_EXPLORATION",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x238*/ { "CMSG_SEND_MAIL",                               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                  },
+    /*0x238*/ { "CMSG_SEND_MAIL",                               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x239*/ { "SMSG_SEND_MAIL_RESULT",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x23A*/ { "CMSG_GET_MAIL_LIST",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGetMail                   },
+    /*0x23A*/ { "CMSG_GET_MAIL_LIST",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x23B*/ { "SMSG_MAIL_LIST_RESULT",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x23C*/ { "CMSG_BATTLEFIELD_LIST",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundListOpcode    }, // ..wtf??
+    /*0x23C*/ { "CMSG_BATTLEFIELD_LIST",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x23D*/ { "SMSG_BATTLEFIELD_LIST",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x23E*/ { "CMSG_BATTLEFIELD_JOIN",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x23F*/ { "SMSG_BATTLEFIELD_WIN_OBSOLETE",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -680,7 +569,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x28B*/ { "CMSG_SET_PVP_TITLE",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x28C*/ { "SMSG_PVP_CREDIT",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x28D*/ { "SMSG_AUCTION_REMOVED_NOTIFICATION",            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x28E*/ { "CMSG_GROUP_RAID_CONVERT",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRaidConvertOpcode         },
+    /*0x28E*/ { "CMSG_GROUP_RAID_CONVERT",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x28F*/ { "CMSG_GROUP_ASSISTANT_LEADER",                  STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGroupAssistantLeaderOpcode},
     /*0x290*/ { "CMSG_BUYBACK_ITEM",                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               },
     /*0x291*/ { "SMSG_SERVER_MESSAGE",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -708,7 +597,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2A7*/ { "SMSG_GAMEOBJECT_RESET_STATE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2A8*/ { "CMSG_REPAIR_ITEM",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRepairItemOpcode          },
     /*0x2A9*/ { "SMSG_CHAT_PLAYER_NOT_FOUND",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2AA*/ { "MSG_TALENT_WIPE_CONFIRM",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleTalentWipeOpcode          },
+    /*0x2AA*/ { "MSG_TALENT_WIPE_CONFIRM",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2AB*/ { "SMSG_SUMMON_REQUEST",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2AC*/ { "CMSG_SUMMON_RESPONSE",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSummonResponseOpcode      },
     /*0x2AD*/ { "MSG_MOVE_TOGGLE_GRAVITY_CHEAT",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -727,7 +616,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2BC*/ { "SMSG_PLAYER_SKINNED",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2BD*/ { "SMSG_DURABILITY_DAMAGE_DEATH",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2BE*/ { "CMSG_SET_EXPLORATION",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x2BF*/ { "CMSG_SET_ACTIONBAR_TOGGLES",                   STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleSetActionBarTogglesOpcode },
+    /*0x2BF*/ { "CMSG_SET_ACTIONBAR_TOGGLES",                   STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2C0*/ { "UMSG_DELETE_GUILD_CHARTER",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x2C1*/ { "MSG_PETITION_RENAME",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionRenameOpcode      },
     /*0x2C2*/ { "SMSG_INIT_WORLD_STATES",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -735,9 +624,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2C4*/ { "CMSG_ITEM_NAME_QUERY",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleItemNameQueryOpcode       },
     /*0x2C5*/ { "SMSG_ITEM_NAME_QUERY_RESPONSE",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2C6*/ { "SMSG_PET_ACTION_FEEDBACK",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2C7*/ { "CMSG_CHAR_RENAME",                             STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleChangePlayerNameOpcode    },
+    /*0x2C7*/ { "CMSG_CHAR_RENAME",                             STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2C8*/ { "SMSG_CHAR_RENAME",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2C9*/ { "CMSG_MOVE_SPLINE_DONE",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNextDestinationOpcode }, // ..wtf??
+    /*0x2C9*/ { "CMSG_MOVE_SPLINE_DONE",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2CA*/ { "CMSG_MOVE_FALL_RESET",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           },
     /*0x2CB*/ { "SMSG_INSTANCE_SAVE_CREATED",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2CC*/ { "SMSG_RAID_INSTANCE_INFO",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -745,13 +634,13 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2CE*/ { "CMSG_MOVE_TIME_SKIPPED",                       STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode     },
     /*0x2CF*/ { "CMSG_MOVE_FEATHER_FALL_ACK",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleFeatherFallAck            },
     /*0x2D0*/ { "CMSG_MOVE_WATER_WALK_ACK",                     STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck          },
-    /*0x2D1*/ { "CMSG_MOVE_NOT_ACTIVE_MOVER",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMoveNotActiveMoverOpcode  },
+    /*0x2D1*/ { "CMSG_MOVE_NOT_ACTIVE_MOVER",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2D2*/ { "SMSG_PLAY_SOUND",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2D3*/ { "CMSG_BATTLEFIELD_STATUS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode   },
     /*0x2D4*/ { "SMSG_BATTLEFIELD_STATUS",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2D5*/ { "CMSG_BATTLEFIELD_PORT",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundPlayerPortOpcode}, // ..wtf??
+    /*0x2D5*/ { "CMSG_BATTLEFIELD_PORT",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2D6*/ { "MSG_INSPECT_HONOR_STATS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode   },
-    /*0x2D7*/ { "CMSG_BATTLEMASTER_HELLO",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundHelloOpcode   }, // ..wtf??
+    /*0x2D7*/ { "CMSG_BATTLEMASTER_HELLO",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2D8*/ { "CMSG_MOVE_START_SWIM_CHEAT",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x2D9*/ { "CMSG_MOVE_STOP_SWIM_CHEAT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x2DA*/ { "SMSG_FORCE_WALK_SPEED_CHANGE",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -760,8 +649,8 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2DD*/ { "CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK",        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck       }, // ..wtf??
     /*0x2DE*/ { "SMSG_FORCE_TURN_RATE_CHANGE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2DF*/ { "CMSG_FORCE_TURN_RATE_CHANGE_ACK",              STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck       }, // ..wtf??
-    /*0x2E0*/ { "MSG_PVP_LOG_DATA",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundPVPlogdataOpcode}, // ..wtf??
-    /*0x2E1*/ { "CMSG_LEAVE_BATTLEFIELD",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundLeaveOpcode   }, // ..wtf??
+    /*0x2E0*/ { "MSG_PVP_LOG_DATA",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3 
+    /*0x2E1*/ { "CMSG_LEAVE_BATTLEFIELD",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2E2*/ { "CMSG_AREA_SPIRIT_HEALER_QUERY",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueryOpcode},
     /*0x2E3*/ { "CMSG_AREA_SPIRIT_HEALER_QUEUE",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueueOpcode},
     /*0x2E4*/ { "SMSG_AREA_SPIRIT_HEALER_TIME",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -774,9 +663,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2EB*/ { "SMSG_BINDER_CONFIRM",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2EC*/ { "SMSG_BATTLEGROUND_PLAYER_JOINED",              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2ED*/ { "SMSG_BATTLEGROUND_PLAYER_LEFT",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2EE*/ { "CMSG_BATTLEMASTER_JOIN",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundJoinOpcode    }, // ..wtf??
+    /*0x2EE*/ { "CMSG_BATTLEMASTER_JOIN",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2EF*/ { "SMSG_ADDON_INFO",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2F0*/ { "CMSG_PET_UNLEARN",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetUnlearnOpcode          },
+    /*0x2F0*/ { "CMSG_PET_UNLEARN",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2F1*/ { "SMSG_PET_UNLEARN_CONFIRM",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2F2*/ { "SMSG_PARTY_MEMBER_STATS_FULL",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2F3*/ { "CMSG_PET_SPELL_AUTOCAST",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetSpellAutocastOpcode    },
@@ -788,7 +677,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2F9*/ { "SMSG_MINIGAME_MOVE_FAILED",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2FA*/ { "SMSG_RAID_INSTANCE_MESSAGE",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2FB*/ { "SMSG_COMPRESSED_MOVES",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x2FC*/ { "CMSG_GUILD_INFO_TEXT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildChangeInfoOpcode     },
+    /*0x2FC*/ { "CMSG_GUILD_INFO_TEXT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x2FD*/ { "SMSG_CHAT_RESTRICTED",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2FE*/ { "SMSG_SPLINE_SET_RUN_SPEED",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x2FF*/ { "SMSG_SPLINE_SET_RUN_BACK_SPEED",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -815,8 +704,8 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x314*/ { "SMSG_GAMETIMEBIAS_SET",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x315*/ { "CMSG_DEBUG_ACTIONS_START",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x316*/ { "CMSG_DEBUG_ACTIONS_STOP",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x317*/ { "CMSG_SET_FACTION_INACTIVE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetWatchedFactionInactiveOpcode},
-    /*0x318*/ { "CMSG_SET_WATCHED_FACTION",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetWatchedFactionIndexOpcode},
+    /*0x317*/ { "CMSG_SET_FACTION_INACTIVE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x318*/ { "CMSG_SET_WATCHED_FACTION",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x319*/ { "MSG_MOVE_TIME_SKIPPED",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x31A*/ { "SMSG_SPLINE_MOVE_ROOT",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x31B*/ { "CMSG_SET_EXPLORATION_ALL",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -825,7 +714,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x31E*/ { "SMSG_INSTANCE_RESET",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x31F*/ { "SMSG_INSTANCE_RESET_FAILED",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x320*/ { "SMSG_UPDATE_LAST_INSTANCE",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x321*/ { "MSG_RAID_TARGET_UPDATE",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRaidIconTargetOpcode      },
+    /*0x321*/ { "MSG_RAID_TARGET_UPDATE",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x322*/ { "MSG_RAID_READY_CHECK",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRaidReadyCheckOpcode      },
     /*0x323*/ { "CMSG_LUA_USAGE",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x324*/ { "SMSG_PET_ACTION_SOUND",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -833,7 +722,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x326*/ { "SMSG_GHOSTEE_GONE",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x327*/ { "CMSG_GM_UPDATE_TICKET_STATUS",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x328*/ { "SMSG_GM_TICKET_STATUS_UPDATE",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x329*/ { "MSG_SET_DUNGEON_DIFFICULTY",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleDungeonDifficultyOpcode   },
+    /*0x329*/ { "MSG_SET_DUNGEON_DIFFICULTY",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x32A*/ { "CMSG_GMSURVEY_SUBMIT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmit            },
     /*0x32B*/ { "SMSG_UPDATE_INSTANCE_OWNERSHIP",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x32C*/ { "CMSG_IGNORE_KNOCKBACK_CHEAT",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -871,30 +760,30 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x34C*/ { "SMSG_ARENA_TEAM_QUERY_RESPONSE",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x34D*/ { "CMSG_ARENA_TEAM_ROSTER",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRosterOpcode     },
     /*0x34E*/ { "SMSG_ARENA_TEAM_ROSTER",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x34F*/ { "CMSG_ARENA_TEAM_INVITE",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamAddMemberOpcode  },
+    /*0x34F*/ { "CMSG_ARENA_TEAM_INVITE",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x350*/ { "SMSG_ARENA_TEAM_INVITE",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x351*/ { "CMSG_ARENA_TEAM_ACCEPT",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamInviteAcceptOpcode},
-    /*0x352*/ { "CMSG_ARENA_TEAM_DECLINE",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamInviteDeclineOpcode},
+    /*0x351*/ { "CMSG_ARENA_TEAM_ACCEPT",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x352*/ { "CMSG_ARENA_TEAM_DECLINE",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x353*/ { "CMSG_ARENA_TEAM_LEAVE",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamLeaveOpcode      },
     /*0x354*/ { "CMSG_ARENA_TEAM_REMOVE",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRemoveOpcode     },
     /*0x355*/ { "CMSG_ARENA_TEAM_DISBAND",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamDisbandOpcode    },
-    /*0x356*/ { "CMSG_ARENA_TEAM_LEADER",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamPromoteToCaptainOpcode}, // .. um?? much simpler the right way..no?
+    /*0x356*/ { "CMSG_ARENA_TEAM_LEADER",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x357*/ { "SMSG_ARENA_TEAM_EVENT",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x358*/ { "CMSG_BATTLEMASTER_JOIN_ARENA",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundArenaJoin     }, // FIXIT! this isnt a battlegrounds thing... "sigh"
+    /*0x358*/ { "CMSG_BATTLEMASTER_JOIN_ARENA",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x359*/ { "MSG_MOVE_START_ASCEND",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           },
     /*0x35A*/ { "MSG_MOVE_STOP_ASCEND",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           },
     /*0x35B*/ { "SMSG_ARENA_TEAM_STATS",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x35C*/ { "CMSG_LFG_SET_AUTOJOIN",                        STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetAutoJoinOpcode      },
-    /*0x35D*/ { "CMSG_LFG_CLEAR_AUTOJOIN",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgClearAutoJoinOpcode    },
-    /*0x35E*/ { "CMSG_LFM_SET_AUTOFILL",                        STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleLfmSetAutoFillOpcode      },
-    /*0x35F*/ { "CMSG_LFM_CLEAR_AUTOFILL",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfmClearAutoFillOpcode    },
+    /*0x35C*/ { "CMSG_LFG_SET_AUTOJOIN",                        STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x35D*/ { "CMSG_LFG_CLEAR_AUTOJOIN",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x35E*/ { "CMSG_LFM_SET_AUTOFILL",                        STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x35F*/ { "CMSG_LFM_CLEAR_AUTOFILL",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x360*/ { "CMSG_ACCEPT_LFG_MATCH",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x361*/ { "CMSG_DECLINE_LFG_MATCH",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x362*/ { "CMSG_CANCEL_PENDING_LFG",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x363*/ { "CMSG_CLEAR_LOOKING_FOR_GROUP",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgClearOpcode            },
-    /*0x364*/ { "CMSG_CLEAR_LOOKING_FOR_MORE",                  STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfmClearOpcode            },
-    /*0x365*/ { "CMSG_SET_LOOKING_FOR_MORE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetLfmOpcode              },
-    /*0x366*/ { "CMSG_SET_LFG_COMMENT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetLfgCommentOpcode       },
+    /*0x363*/ { "CMSG_CLEAR_LOOKING_FOR_GROUP",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x364*/ { "CMSG_CLEAR_LOOKING_FOR_MORE",                  STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x365*/ { "CMSG_SET_LOOKING_FOR_MORE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x366*/ { "CMSG_SET_LFG_COMMENT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x367*/ { "SMSG_LFG_TIMEDOUT",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x368*/ { "SMSG_LFG_OTHER_TIMEDOUT",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x369*/ { "SMSG_LFG_AUTOJOIN_FAILED",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -911,7 +800,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x374*/ { "CMSG_SET_TITLE",                               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode            },
     /*0x375*/ { "CMSG_CANCEL_MOUNT_AURA",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelMountAuraOpcode     },
     /*0x376*/ { "SMSG_ARENA_ERROR",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x377*/ { "MSG_INSPECT_ARENA_TEAMS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectArenaStatsOpcode   },
+    /*0x377*/ { "MSG_INSPECT_ARENA_TEAMS",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x378*/ { "SMSG_DEATH_RELEASE_LOC",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x379*/ { "CMSG_CANCEL_TEMP_ENCHANTMENT",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelTempEnchantmentOpcode},
     /*0x37A*/ { "SMSG_FORCED_DEATH_UPDATE",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -932,7 +821,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x389*/ { "CMSG_SET_TAXI_BENCHMARK_MODE",                 STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleSetTaxiBenchmarkOpcode    },
     /*0x38A*/ { "SMSG_JOINED_BATTLEGROUND_QUEUE",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x38B*/ { "SMSG_REALM_SPLIT",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x38C*/ { "CMSG_REALM_SPLIT",                             STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleRealmStateRequestOpcode   },
+    /*0x38C*/ { "CMSG_REALM_SPLIT",                             STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x38D*/ { "CMSG_MOVE_CHNG_TRANSPORT",                     STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           },
     /*0x38E*/ { "MSG_PARTY_ASSIGNMENT",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePartyAssignmentOpcode     }, 
     /*0x38F*/ { "SMSG_OFFER_PETITION_ERROR",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -967,7 +856,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3AC*/ { "SMSG_DISMOUNT",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3AD*/ { "MSG_MOVE_UPDATE_CAN_FLY",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3AE*/ { "MSG_RAID_READY_CHECK_CONFIRM",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x3AF*/ { "CMSG_VOICE_SESSION_ENABLE",                    STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleVoiceSettingsOpcode       },
+    /*0x3AF*/ { "CMSG_VOICE_SESSION_ENABLE",                    STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3B0*/ { "SMSG_VOICE_PARENTAL_CONTROLS",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3B1*/ { "CMSG_GM_WHISPER",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3B2*/ { "SMSG_GM_MESSAGECHAT",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -990,7 +879,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3C3*/ { "SMSG_CHEAT_PLAYER_LOOKUP",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3C4*/ { "SMSG_KICK_REASON",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3C5*/ { "MSG_RAID_READY_CHECK_FINISHED",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRaidReadyCheckFinishedOpcode},
-    /*0x3C6*/ { "CMSG_COMPLAIN",                                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleReportSpamOpcode          }, // ..wtf??
+    /*0x3C6*/ { "CMSG_COMPLAIN",                                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3C7*/ { "SMSG_COMPLAIN_RESULT",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3C8*/ { "SMSG_FEATURE_SYSTEM_STATUS",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3C9*/ { "CMSG_GM_SHOW_COMPLAINTS",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -1002,10 +891,10 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3CF*/ { "CMSG_TARGET_CAST",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3D0*/ { "CMSG_TARGET_SCRIPT_CAST",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3D1*/ { "CMSG_CHANNEL_DISPLAY_LIST",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelDisplayListQuery   },
-    /*0x3D2*/ { "CMSG_SET_ACTIVE_VOICE_CHANNEL",                STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceChatQuery     },
+    /*0x3D2*/ { "CMSG_SET_ACTIVE_VOICE_CHANNEL",                STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3D3*/ { "CMSG_GET_CHANNEL_MEMBER_COUNT",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGetChannelMemberCount     },
     /*0x3D4*/ { "SMSG_CHANNEL_MEMBER_COUNT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x3D5*/ { "CMSG_CHANNEL_VOICE_ON",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelEnableVoiceOpcode  },
+    /*0x3D5*/ { "CMSG_CHANNEL_VOICE_ON",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3D6*/ { "CMSG_CHANNEL_VOICE_OFF",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3D7*/ { "CMSG_DEBUG_LIST_TARGETS",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3D8*/ { "SMSG_DEBUG_LIST_TARGETS",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -1019,17 +908,17 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3E0*/ { "SMSG_COMSAT_DISCONNECT",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3E1*/ { "SMSG_COMSAT_CONNECT_FAIL",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3E2*/ { "SMSG_VOICE_CHAT_STATUS",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x3E3*/ { "CMSG_REPORT_PVP_AFK",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlegroundReportAFK     }, // ..wtf?? why is all pvp related shit set for bg's?
+    /*0x3E3*/ { "CMSG_REPORT_PVP_AFK",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3E4*/ { "CMSG_REPORT_PVP_AFK_RESULT",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x3E5*/ { "CMSG_GUILD_BANKER_ACTIVATE",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankQuery            }, // ..wtf??
-    /*0x3E6*/ { "CMSG_GUILD_BANK_QUERY_TAB",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankTabColon         }, // ..wtf?? Who named this shit? 
+    /*0x3E5*/ { "CMSG_GUILD_BANKER_ACTIVATE",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x3E6*/ { "CMSG_GUILD_BANK_QUERY_TAB",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3E7*/ { "SMSG_GUILD_BANK_LIST",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x3E8*/ { "CMSG_GUILD_BANK_SWAP_ITEMS",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankDepositItem      }, // ..wtf?? this is for bank swap item ...someones retarded...fix it
+    /*0x3E8*/ { "CMSG_GUILD_BANK_SWAP_ITEMS",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
     /*0x3E9*/ { "CMSG_GUILD_BANK_BUY_TAB",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankBuyTab           },
-    /*0x3EA*/ { "CMSG_GUILD_BANK_UPDATE_TAB",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankModifyTab        }, // ..wtf?? not modify...update. fixit..someone cant read.
-    /*0x3EB*/ { "CMSG_GUILD_BANK_DEPOSIT_MONEY",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankDeposit          }, // ..wtf?? not gernal deposit, this is for g.money handling. fixit
-    /*0x3EC*/ { "CMSG_GUILD_BANK_WITHDRAW_MONEY",               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankWithdraw         }, // ..wtf?? not gernal deposit, this is for g.money handling. fixit
-    /*0x3ED*/ { "MSG_GUILD_BANK_LOG_QUERY",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankLog              }, // ..wtf?? 
+    /*0x3EA*/ { "CMSG_GUILD_BANK_UPDATE_TAB",                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Need rewrite for 2.4.3
+    /*0x3EB*/ { "CMSG_GUILD_BANK_DEPOSIT_MONEY",                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x3EC*/ { "CMSG_GUILD_BANK_WITHDRAW_MONEY",               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x3ED*/ { "MSG_GUILD_BANK_LOG_QUERY",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
     /*0x3EE*/ { "CMSG_SET_CHANNEL_WATCH",                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetChannelWatch           },
     /*0x3EF*/ { "SMSG_USERLIST_ADD",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3F0*/ { "SMSG_USERLIST_REMOVE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -1044,9 +933,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3F9*/ { "CMSG_GM_CHARACTER_RESTORE",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3FA*/ { "CMSG_GM_CHARACTER_SAVE",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3FB*/ { "SMSG_VOICESESSION_FULL",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x3FC*/ { "MSG_GUILD_PERMISSIONS",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankGetRights        }, // ..wtf?? rly? need i say more? fixit
-    /*0x3FD*/ { "MSG_GUILD_BANK_MONEY_WITHDRAWN",               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankGetMoneyAmount   }, // ..wtf?? fixit
-    /*0x3FE*/ { "MSG_GUILD_EVENT_LOG_QUERY",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildEventLogOpcode       }, // ..wtf?? fixit
+    /*0x3FC*/ { "MSG_GUILD_PERMISSIONS",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x3FD*/ { "MSG_GUILD_BANK_MONEY_WITHDRAWN",               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x3FE*/ { "MSG_GUILD_EVENT_LOG_QUERY",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
     /*0x3FF*/ { "CMSG_MAELSTROM_RENAME_GUILD",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x400*/ { "CMSG_GET_MIRRORIMAGE_DATA",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x401*/ { "SMSG_MIRRORIMAGE_DATA",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -1056,9 +945,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x405*/ { "SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT",        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x406*/ { "CMSG_KEEP_ALIVE",                              STATUS_NEVER,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess            },
     /*0x407*/ { "SMSG_RAID_READY_CHECK_ERROR",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x408*/ { "CMSG_OPT_OUT_OF_LOOT",                         STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleGroupPassOnLootOpcode     }, // ..wtf?? are we just making up worldhandler names now? fixit
-    /*0x409*/ { "MSG_QUERY_GUILD_BANK_TEXT",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankTabText          }, // ..wtf??
-    /*0x40A*/ { "CMSG_SET_GUILD_BANK_TEXT",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankSetTabText       },
+    /*0x408*/ { "CMSG_OPT_OUT_OF_LOOT",                         STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x409*/ { "MSG_QUERY_GUILD_BANK_TEXT",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
+    /*0x40A*/ { "CMSG_SET_GUILD_BANK_TEXT",                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
     /*0x40B*/ { "CMSG_SET_GRANTABLE_LEVELS",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x40C*/ { "CMSG_GRANT_LEVEL",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x40D*/ { "CMSG_REFER_A_FRIEND",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -1070,9 +959,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x413*/ { "CMSG_TOTEM_DESTROYED",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleTotemDestroyed            },
     /*0x414*/ { "CMSG_EXPIRE_RAID_INSTANCE",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x415*/ { "CMSG_NO_SPELL_VARIANCE",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x416*/ { "CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY",        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestgiverStatusQueryMultipleOpcode},
+    /*0x416*/ { "CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY",        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
     /*0x417*/ { "SMSG_QUESTGIVER_STATUS_MULTIPLE",              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x418*/ { "CMSG_SET_PLAYER_DECLINED_NAMES",               STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleSetPlayerDeclinedNamesOpcode},
+    /*0x418*/ { "CMSG_SET_PLAYER_DECLINED_NAMES",               STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                     }, // Needs rewrite for 2.4.3
     /*0x419*/ { "SMSG_SET_PLAYER_DECLINED_NAMES_RESULT",        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x41A*/ { "CMSG_QUERY_SERVER_BUCK_DATA",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x41B*/ { "CMSG_CLEAR_SERVER_BUCK_DATA",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

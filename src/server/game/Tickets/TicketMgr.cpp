@@ -136,6 +136,7 @@ void GmTicket::WritePacket(WorldPacket& data) const
     data << uint8(_viewed ? GMTICKET_OPENEDBYGM_STATUS_OPENED : GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED); // whether or not it has been viewed
 }
 
+/*
 void GmTicket::SendResponse(WorldSession* session) const
 {
     WorldPacket data(SMSG_GMRESPONSE_RECEIVED);
@@ -162,6 +163,7 @@ void GmTicket::SendResponse(WorldSession* session) const
 
     session->SendPacket(&data);
 }
+*/ // Research for 2.4.3
 
 std::string GmTicket::FormatMessageString(ChatHandler& handler, bool detailed) const
 {

@@ -207,6 +207,7 @@ void AuraApplication::BuildUpdatePacket(ByteBuffer& data, bool remove) const
     }
 }
 
+/*
 void AuraApplication::ClientUpdate(bool remove)
 {
     _needClientUpdate = false;
@@ -217,6 +218,7 @@ void AuraApplication::ClientUpdate(bool remove)
 
     _target->SendMessageToSet(&data, true);
 }
+*/ // 2.4.3?
 
 uint8 Aura::BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleEffectMask, WorldObject* owner)
 {

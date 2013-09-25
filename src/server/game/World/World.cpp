@@ -76,7 +76,6 @@
 #include "Channel.h"
 #include "WardenCheckMgr.h"
 #include "Warden.h"
-#include "CalendarMgr.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1696,9 +1695,6 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Calendar data...");
-    sCalendarMgr->LoadFromDB();
 
     ///- Initialize game time and timers
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Initialize game time and timers");
