@@ -29,7 +29,6 @@
 #include "GuildMgr.h"
 #include "InstanceSaveMgr.h"
 #include "Language.h"
-#include "LFGMgr.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
@@ -4936,6 +4935,7 @@ InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 mapID)
     return NULL;
 }
 
+/*
 void ObjectMgr::LoadInstanceEncounters()
 {
     uint32 oldMSTime = getMSTime();
@@ -5014,6 +5014,7 @@ void ObjectMgr::LoadInstanceEncounters()
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u instance encounters in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
+*/ // Does this have anything to do with 2.4.3?
 
 GossipText const* ObjectMgr::GetGossipText(uint32 Text_ID) const
 {

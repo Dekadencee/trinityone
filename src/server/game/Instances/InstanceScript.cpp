@@ -22,7 +22,6 @@
 #include "GameObject.h"
 #include "Group.h"
 #include "InstanceScript.h"
-#include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
 #include "Player.h"
@@ -450,6 +449,7 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
         }
     }
 
+/*
     if (dungeonId)
     {
         Map::PlayerList const& players = instance->GetPlayers();
@@ -464,4 +464,5 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
                     }
         }
     }
+*/
 }

@@ -539,24 +539,6 @@ void WorldSession::HandleSelfResOpcode(WorldPacket & /*recvData*/)
     }
 }
 
-void WorldSession::HandleSpellClick(WorldPacket& recvData)
-{
-    uint64 guid;
-    recvData >> guid;
-
-    // this will get something not in world. crash
-    Creature* unit = ObjectAccessor::GetCreatureOrPet(*_player, guid);
-
-    if (!unit)
-        return;
-
-    /// @todo Unit::SetCharmedBy: 28782 is not in world but 0 is trying to charm it! -> crash
-    if (!unit->IsInWorld())
-        return;
-
-    unit->HandleSpellClick(_player);
-}
-
 void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
 {
     TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GET_MIRRORIMAGE_DATA");

@@ -214,9 +214,6 @@ class BattlegroundWS : public Battleground
 
         uint32 GetPrematureWinner();
 
-        /* Achievements*/
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0);
-
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
         uint64 m_DroppedFlagGUID[2];

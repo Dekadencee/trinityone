@@ -43,7 +43,6 @@
 #include "GuildMgr.h"
 #include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
-#include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
 #include "MapInstanced.h"
@@ -771,20 +770,8 @@ Player::Player(WorldSession* session): Unit(true)
     m_HomebindTimer = 0;
     m_InstanceValid = true;
     m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
-    m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
 
     m_lastPotionId = 0;
-
-    m_activeSpec = 0;
-    m_specsCount = 1;
-
-    for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
-    {
-        for (uint8 g = 0; g < MAX_GLYPH_SLOT_INDEX; ++g)
-            m_Glyphs[i][g] = 0;
-
-        m_talents[i] = new PlayerTalentMap();
-    }
 
     for (uint8 i = 0; i < BASEMOD_END; ++i)
     {
@@ -971,8 +958,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     SetUInt32Value(PLAYER_BYTES, (createInfo->Skin | (createInfo->Face << 8) | (createInfo->HairStyle << 16) | (createInfo->HairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (createInfo->FacialHair |
                                    (0x00 << 8) |
-                                   (0x00 << 16) |
-                                   (((GetSession()->IsARecruiter() || GetSession()->GetRecruiterId() != 0) ? REST_STATE_RAF_LINKED : REST_STATE_NOT_RAF_LINKED) << 24)));
+                                   (0x00 << 16))); 
     SetByteValue(PLAYER_BYTES_3, 0, createInfo->Gender);
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
 
@@ -2920,15 +2906,10 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
         return;
 
     uint32 bonus_xp = 0;
-    bool recruitAFriend = GetsRecruitAFriendBonus(true);
 
-    // RaF does NOT stack with rested experience
-    if (recruitAFriend)
-        bonus_xp = 2 * xp; // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
-    else
-        bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+    bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
 
-    SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
+    SendLogXPGain(xp, victim, bonus_xp, group_rate);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -5031,9 +5012,6 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
 
-    if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
-        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
-
     setDeathState(ALIVE);
 
     SetMovement(MOVE_LAND_WALK);
@@ -6871,9 +6849,6 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
         percent *= repRate;
     }
 
-    if (source != REPUTATION_SOURCE_SPELL && GetsRecruitAFriendBonus(false))
-        percent *= 1.0f + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS);
-
     return CalculatePct(rep, percent);
 }
 
@@ -6946,11 +6921,13 @@ void Player::RewardReputation(Quest const* quest)
         else
         {
             uint32 row = ((quest->RewardFactionValueId[i] < 0) ? 1 : 0) + 1;
+/*
             if (QuestFactionRewEntry const* questFactionRewEntry = sQuestFactionRewardStore.LookupEntry(row))
             {
                 uint32 field = abs(quest->RewardFactionValueId[i]);
                 rep = questFactionRewEntry->QuestRewFactionValue[field];
             }
+*/
         }
 
         if (!rep)
@@ -11687,6 +11664,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+/*
 InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
 {
     if (!GetGroup() || !GetGroup()->isLFGGroup())
@@ -11763,6 +11741,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
 
     return EQUIP_ERR_OK;
 }
+*/ // The whole LFG system will have to be redone for 2.4.3
 
 InventoryResult Player::CanUseAmmo(uint32 item) const
 {
@@ -17065,7 +17044,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     // reset stats before loading any modifiers
     InitStatsForLevel();
-    InitGlyphsForLevel();
     InitTaxiNodesForLevel();
 
     // rest bonus can only be calculated after InitStatsForLevel()
@@ -17106,9 +17084,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
     _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELLS));
 
-    _LoadGlyphs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GLYPHS));
     _LoadAuras(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_AURAS), time_diff);
-    _LoadGlyphAuras();
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
@@ -17224,11 +17200,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
                 break;
         }
     }
-
-    // RaF stuff.
-    m_grantableLevels = fields[66].GetUInt8();
-    if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
-        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
 
     if (m_grantableLevels > 0)
         SetByteValue(PLAYER_FIELD_BYTES, 1, 0x01);
@@ -18189,8 +18160,6 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
             CharacterDatabase.Execute(stmt);
         }
 
-        if (itr->second.perm)
-            GetSession()->SendCalendarRaidLockout(itr->second.save, false);
 
         itr->second.save->RemovePlayer(this);               // save can become invalid
         m_boundInstances[difficulty].erase(itr++);
@@ -18263,7 +18232,6 @@ void Player::BindToInstance()
     GetSession()->SendPacket(&data);
     BindToInstance(mapSave, true);
 
-    GetSession()->SendCalendarRaidLockout(mapSave, true);
 }
 
 void Player::SetPendingBind(uint32 instanceId, uint32 bindTimer)
@@ -19009,7 +18977,6 @@ void Player::_SaveInventory(SQLTransaction& trans)
 
                 // also THIS item should be somewhere else, cheat attempt
                 item->FSetState(ITEM_REMOVED); // we are IN updateQueue right now, can't use SetState which modifies the queue
-                DeleteRefundReference(item->GetGUIDLow());
                 // don't skip, let the switch delete it
                 //continue;
             }
@@ -20451,10 +20418,7 @@ void Player::SetRestBonus(float rest_bonus_new)
     else
         m_rest_bonus = rest_bonus_new;
 
-    // update data for client
-    if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
-        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RAF_LINKED);
-    else if (m_rest_bonus > 10)
+    if (m_rest_bonus > 10)
         SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);              // Set Reststate = Rested
     else if (m_rest_bonus <= 1)
         SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NOT_RAF_LINKED);              // Set Reststate = Normal
@@ -22431,7 +22395,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     }
 }
 
-/*
+
 void Player::SendAurasForTarget(Unit* target)
 {
     if (!target || target->GetVisibleAuras()->empty())                  // speedup things
@@ -22449,7 +22413,7 @@ void Player::SendAurasForTarget(Unit* target)
     if (target->HasAuraType(SPELL_AURA_HOVER))
         target->SetHover(true, true);
 
-    WorldPacket data(SMSG_AURA_UPDATE_ALL);
+    WorldPacket data(SMSG_UPDATE_AURA_DURATION);
     data.append(target->GetPackGUID());
 
     Unit::VisibleAuraMap const* visibleAuras = target->GetVisibleAuras();
@@ -22461,7 +22425,6 @@ void Player::SendAurasForTarget(Unit* target)
 
     GetSession()->SendPacket(&data);
 }
-*/ // Not sure about 2.4.3
 
 void Player::SetDailyQuestStatus(uint32 quest_id)
 {
@@ -23026,14 +22989,7 @@ uint32 Player::GetResurrectionSpellId()
             spell_id = 23700;
         }
     }
-
-    // Reincarnation (passive spell)  // prio: 1                  // Glyph of Renewed Life
-    if (prio < 1 && HasSpell(20608) && !HasSpellCooldown(21169) && (HasAura(58059) || HasItemCount(17030)))
-        spell_id = 21169;
-
-    return spell_id;
 }
-
 // Used in triggers for check "Only to targets that grant experience or honor" req
 bool Player::isHonorOrXPTarget(Unit* victim)
 {
@@ -23052,47 +23008,6 @@ bool Player::isHonorOrXPTarget(Unit* victim)
                 return false;
     }
     return true;
-}
-
-bool Player::GetsRecruitAFriendBonus(bool forXP)
-{
-    bool recruitAFriend = false;
-    if (getLevel() <= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL) || !forXP)
-    {
-        if (Group* group = this->GetGroup())
-        {
-            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                Player* player = itr->GetSource();
-                if (!player)
-                    continue;
-
-                if (!player->IsAtRecruitAFriendDistance(this))
-                    continue;                               // member (alive or dead) or his corpse at req. distance
-
-                if (forXP)
-                {
-                    // level must be allowed to get RaF bonus
-                    if (player->getLevel() > sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
-                        continue;
-
-                    // level difference must be small enough to get RaF bonus, UNLESS we are lower level
-                    if (player->getLevel() < getLevel())
-                        if (uint8(getLevel() - player->getLevel()) > sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL_DIFFERENCE))
-                            continue;
-                }
-
-                bool ARecruitedB = (player->GetSession()->GetRecruiterId() == GetSession()->GetAccountId());
-                bool BRecruitedA = (GetSession()->GetRecruiterId() == player->GetSession()->GetAccountId());
-                if (ARecruitedB || BRecruitedA)
-                {
-                    recruitAFriend = true;
-                    break;
-                }
-            }
-        }
-    }
-    return recruitAFriend;
 }
 
 void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
@@ -23139,20 +23054,6 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
         return false;
 
     return pRewardSource->GetDistance(player) <= sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE);
-}
-
-bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
-{
-    if (!pOther)
-        return false;
-    const WorldObject* player = GetCorpse();
-    if (!player || IsAlive())
-        player = this;
-
-    if (player->GetMapId() != pOther->GetMapId() || player->GetInstanceId() != pOther->GetInstanceId())
-        return false;
-
-    return pOther->GetDistance(player) <= sWorld->getFloatConfig(CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE);
 }
 
 uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
@@ -23360,6 +23261,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
     return nearMembers[randTarget];
 }
 
+/*
 PartyResult Player::CanUninviteFromGroup() const
 {
     Group const* grp = GetGroup();
@@ -23390,10 +23292,10 @@ PartyResult Player::CanUninviteFromGroup() const
             if (itr->GetSource() && itr->GetSource()->IsInCombat())
                 return ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
-        /* Missing support for these types
-            return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
-            return ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S;
-        */
+//        Missing support for these types
+//           return ERR_PARTY_LFG_BOOT_COOLDOWN_S;
+//           return ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S;
+//        
     }
     else
     {
@@ -23406,12 +23308,16 @@ PartyResult Player::CanUninviteFromGroup() const
 
     return ERR_PARTY_RESULT_OK;
 }
+*/ // The whole LFG system will have to be redone for 2.4.3
 
+/*
 bool Player::isUsingLfg()
 {
     return sLFGMgr->GetState(GetGUID()) != lfg::LFG_STATE_NONE;
 }
+*/ // The whole LFG system will have to be redone for 2.4.3
 
+/*
 bool Player::inRandomLfgDungeon()
 {
     if (sLFGMgr->selectedRandomLfgDungeon(GetGUID()))
@@ -23422,6 +23328,7 @@ bool Player::inRandomLfgDungeon()
 
     return false;
 }
+*/ // The whole LFG system will have to be redone for 2.4.3
 
 void Player::SetBattlegroundOrBattlefieldRaid(Group* group, int8 subgroup)
 {
@@ -23640,43 +23547,6 @@ bool Player::CanCaptureTowerPoint()
     return (!HasStealthAura() &&                            // not stealthed
             !HasInvisibilityAura() &&                       // not invisible
             IsAlive());                                     // live player
-}
-
-uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, BarberShopStyleEntry const* newSkin)
-{
-    uint8 level = getLevel();
-
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;                               // max level in this dbc
-
-    uint8 hairstyle = GetByteValue(PLAYER_BYTES, 2);
-    uint8 haircolor = GetByteValue(PLAYER_BYTES, 3);
-    uint8 facialhair = GetByteValue(PLAYER_BYTES_2, 0);
-    uint8 skincolor = GetByteValue(PLAYER_BYTES, 0);
-
-    if ((hairstyle == newhairstyle) && (haircolor == newhaircolor) && (facialhair == newfacialhair) && (!newSkin || (newSkin->hair_id == skincolor)))
-        return 0;
-
-    GtBarberShopCostBaseEntry const* bsc = sGtBarberShopCostBaseStore.LookupEntry(level - 1);
-
-    if (!bsc)                                                // shouldn't happen
-        return 0xFFFFFFFF;
-
-    float cost = 0;
-
-    if (hairstyle != newhairstyle)
-        cost += bsc->cost;                                  // full price
-
-    if ((haircolor != newhaircolor) && (hairstyle == newhairstyle))
-        cost += bsc->cost * 0.5f;                           // +1/2 of price
-
-    if (facialhair != newfacialhair)
-        cost += bsc->cost * 0.75f;                          // +3/4 of price
-
-    if (newSkin && skincolor != newSkin->hair_id)
-        cost += bsc->cost * 0.75f;                          // +5/6 of price
-
-    return uint32(cost);
 }
 
 bool Player::isTotalImmune()

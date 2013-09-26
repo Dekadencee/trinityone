@@ -1570,9 +1570,6 @@ class BattlegroundAV : public Battleground
 
         WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
-        // Achievement: Av perfection and Everything counts
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0);
-
         uint32 GetPrematureWinner();
 
     private:

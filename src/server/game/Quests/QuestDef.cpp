@@ -164,12 +164,13 @@ Quest::Quest(Field* questRecord)
             ++_rewChoiceItemsCount;
 }
 
+/*
 uint32 Quest::XPValue(Player* player) const
 {
     if (player)
     {
         int32 quest_level = (Level == -1 ? player->getLevel() : Level);
-        const QuestXPEntry* xpentry = sQuestXPStore.LookupEntry(quest_level);
+//        const QuestXPEntry* xpentry = sQuestXPStore.LookupEntry(quest_level);
         if (!xpentry)
             return 0;
 
@@ -194,6 +195,7 @@ uint32 Quest::XPValue(Player* player) const
 
     return 0;
 }
+*/ // 2.4.3 didn't have QuestXP.dbc. XP was pulled from quest_template, so this will have to be rewritten along with other parts of the quest system.
 
 int32 Quest::GetRewOrReqMoney() const
 {

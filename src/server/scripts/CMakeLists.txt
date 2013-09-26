@@ -15,6 +15,8 @@ if (USE_SCRIPTPCH)
   set(scripts_STAT_PCH_SRC PrecompiledHeaders/ScriptPCH.cpp)
 endif ()
 
+#THIS IS TEMPORARY
+if (SCRIPTS)
 message(STATUS "SCRIPT PREPARATIONS")
 include(Spells/CMakeLists.txt)
 
@@ -28,6 +30,7 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
 )
+endif()
 
 if(SCRIPTS)
   include(Custom/CMakeLists.txt)
@@ -143,12 +146,15 @@ include_directories(
   ${MYSQL_INCLUDE_DIR}
 )
 
+# TEMPORARY
+if (SCRIPTS)
 add_library(scripts STATIC
   ${scripts_STAT_SRCS}
   ${scripts_STAT_PCH_SRC}
 )
 
 add_dependencies(scripts revision.h)
+endif()
 
 # Generate precompiled header
 if (USE_SCRIPTPCH)

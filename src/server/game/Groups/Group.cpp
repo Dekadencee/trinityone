@@ -33,7 +33,6 @@
 #include "InstanceSaveMgr.h"
 #include "MapInstanced.h"
 #include "Util.h"
-#include "LFGMgr.h"
 #include "UpdateFieldFlags.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
@@ -196,8 +195,6 @@ void Group::LoadGroupFromDB(Field* fields)
     else
        m_raidDifficulty = Difficulty(r_diff);
 
-    if (m_groupType & GROUPTYPE_LFG)
-        sLFGMgr->_LoadFromDB(fields, GetGUID());
 }
 
 void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles)
@@ -221,10 +218,9 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subgroup);
-
-    sLFGMgr->SetupGroupMember(member.guid, GetGUID());
 }
 
+/*
 void Group::ConvertToLFG()
 {
     m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
@@ -241,6 +237,7 @@ void Group::ConvertToLFG()
 
     SendUpdate();
 }
+*/ // The whole LFG system will have to be rewritten for 2.4.3
 
 void Group::ConvertToRaid()
 {
@@ -490,18 +487,14 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
 
     sScriptMgr->OnGroupRemoveMember(this, guid, method, kicker, reason);
 
-    // LFG group vote kick handled in scripts
-    if (isLFGGroup() && method == GROUP_REMOVEMETHOD_KICK)
-        return m_memberSlots.size();
-
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG/BF allow 1 member group)
-    if (GetMembersCount() > ((isBGGroup() || isLFGGroup() || isBFGroup()) ? 1u : 2u))
+    if (GetMembersCount() > ((isBGGroup()) ? 1u : 2u))
     {
         Player* player = ObjectAccessor::FindPlayer(guid);
         if (player)
         {
             // Battleground group handling
-            if (isBGGroup() || isBFGroup())
+            if (isBGGroup())
                 player->RemoveFromBattlegroundOrBattlefieldRaid();
             else
             // Regular group
@@ -517,7 +510,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
 
             WorldPacket data;
 
-            if (method == GROUP_REMOVEMETHOD_KICK || method == GROUP_REMOVEMETHOD_KICK_LFG)
+            if (method == GROUP_REMOVEMETHOD_KICK)
             {
                 data.Initialize(SMSG_GROUP_UNINVITE, 0);
                 player->GetSession()->SendPacket(&data);
@@ -533,7 +526,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
         }
 
         // Remove player from group in DB
-        if (!isBGGroup() && !isBFGroup())
+        if (!isBGGroup())
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_MEMBER);
             stmt->setUInt32(0, GUID_LOPART(guid));
@@ -591,18 +584,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
 
         SendUpdate();
 
-        if (isLFGGroup() && GetMembersCount() == 1)
-        {
-            Player* leader = ObjectAccessor::FindPlayer(GetLeaderGUID());
-            uint32 mapId = sLFGMgr->GetDungeonMapId(GetGUID());
-            if (!mapId || !leader || (leader->IsAlive() && leader->GetMapId() != mapId))
-            {
-                Disband();
-                return false;
-            }
-        }
-
-        if (m_memberMgr.getSize() < ((isLFGGroup() || isBGGroup()) ? 1u : 2u))
+        if (m_memberMgr.getSize() < ((isBGGroup()) ? 1u : 2u))
             Disband();
 
         return true;
@@ -754,7 +736,6 @@ void Group::Disband(bool hideDestroy /* = false */)
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, false, NULL);
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_LFG_DATA);
         stmt->setUInt32(0, m_dbStoreId);
         CharacterDatabase.Execute(stmt);
 
@@ -1488,12 +1469,6 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data << uint8(slot->group);
     data << uint8(slot->flags);
     data << uint8(slot->roles);
-    if (isLFGGroup())
-    {
-        data << uint8(sLFGMgr->GetState(m_guid) == lfg::LFG_STATE_FINISHED_DUNGEON ? 2 : 0); // FIXME - Dungeon save status? 2 = done
-        data << uint32(sLFGMgr->GetDungeon(m_guid));
-    }
-
     data << uint64(m_guid);
     data << uint32(m_counter++);                        // 3.3, value increases every time this packet gets sent
     data << uint32(GetMembersCount()-1);

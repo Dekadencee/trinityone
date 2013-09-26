@@ -65,7 +65,6 @@
 #include "Transport.h"
 #include "ScriptMgr.h"
 #include "AddonMgr.h"
-#include "LFGMgr.h"
 #include "ConditionMgr.h"
 #include "DisableMgr.h"
 #include "CharacterDatabaseCleaner.h"
@@ -1514,14 +1513,8 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading LFG entrance positions..."); // Must be after areatriggers
-    sLFGMgr->LoadLFGDungeons();
-
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Dungeon boss data...");
     sObjectMgr->LoadInstanceEncounters();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading LFG rewards...");
-    sLFGMgr->LoadRewards();
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Graveyard-zone links...");
     sObjectMgr->LoadGraveyardZones();
@@ -2046,9 +2039,6 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_DELETECHARS].Reset();
         Player::DeleteOldCharacters();
     }
-
-    sLFGMgr->Update(diff);
-    RecordTimeDiff("UpdateLFGMgr");
 
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();

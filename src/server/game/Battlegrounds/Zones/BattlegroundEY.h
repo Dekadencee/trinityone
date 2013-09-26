@@ -24,7 +24,6 @@
 
 enum BG_EY_Misc
 {
-    BG_EY_EVENT_START_BATTLE        = 13180, // Achievement: Flurry
     BG_EY_FLAG_RESPAWN_TIME         = (8*IN_MILLISECONDS),
     BG_EY_FPOINTS_TICK_TIME         = (2*IN_MILLISECONDS)
 };

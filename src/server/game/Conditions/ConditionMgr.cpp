@@ -81,12 +81,6 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             }
             break;
         }
-        case CONDITION_ACHIEVEMENT:
-        {
-            if (Player* player = object->ToPlayer())
-                condMeets = player->HasAchieved(ConditionValue1);
-            break;
-        }
         case CONDITION_TEAM:
         {
             if (Player* player = object->ToPlayer())

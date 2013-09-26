@@ -121,8 +121,6 @@ void BattlegroundEY::StartingEventOpenDoors()
         SpawnBGObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
 
-    // Achievement: Flurry
-    StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, BG_EY_EVENT_START_BATTLE);
 }
 
 void BattlegroundEY::AddPoints(uint32 Team, uint32 Points)
@@ -823,7 +821,6 @@ void BattlegroundEY::UpdatePlayerScore(Player* player, uint32 type, uint32 value
     {
         case SCORE_FLAG_CAPTURES:                           // flags captured
             ((BattlegroundEYScore*)itr->second)->FlagCaptures += value;
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, EY_OBJECTIVE_CAPTURE_FLAG);
             break;
         default:
             Battleground::UpdatePlayerScore(player, type, value, doAddHonor);

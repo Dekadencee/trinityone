@@ -546,10 +546,6 @@ bool LinkExtractor::IsValidMessage()
                     link = new SpellChatLink();
                 else if (strcmp(buffer, "enchant") == 0)
                     link = new EnchantmentChatLink();
-                else if (strcmp(buffer, "achievement") == 0)
-                    link = new AchievementChatLink();
-                else if (strcmp(buffer, "glyph") == 0)
-                    link = new GlyphChatLink();
                 else
                 {
                     TC_LOG_TRACE(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): user sent unsupported link type '%s'", _iss.str().c_str(), buffer);
