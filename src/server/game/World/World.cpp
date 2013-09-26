@@ -1486,18 +1486,6 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Game Event Data...");               // must be after loading pools fully
     sGameEventMgr->LoadFromDB();
 
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading UNIT_NPC_FLAG_SPELLCLICK Data..."); // must be after LoadQuests
-    sObjectMgr->LoadNPCSpellClickSpells();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Vehicle Template Accessories...");
-    sObjectMgr->LoadVehicleTemplateAccessories();                // must be after LoadCreatureTemplates() and LoadNPCSpellClickSpells()
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Vehicle Accessories...");
-    sObjectMgr->LoadVehicleAccessories();                       // must be after LoadCreatureTemplates() and LoadNPCSpellClickSpells()
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading SpellArea Data...");                // must be after quest load
-    sSpellMgr->LoadSpellAreas();
-
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger definitions...");
     sObjectMgr->LoadAreaTriggerTeleports();
 
@@ -1512,9 +1500,6 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Dungeon boss data...");
-    sObjectMgr->LoadInstanceEncounters();
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Graveyard-zone links...");
     sObjectMgr->LoadGraveyardZones();
@@ -1624,21 +1609,6 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Conditions...");
     sConditionMgr->LoadConditions();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading faction change achievement pairs...");
-    sObjectMgr->LoadFactionChangeAchievements();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading faction change spell pairs...");
-    sObjectMgr->LoadFactionChangeSpells();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading faction change item pairs...");
-    sObjectMgr->LoadFactionChangeItems();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading faction change reputation pairs...");
-    sObjectMgr->LoadFactionChangeReputations();
-
-    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading faction change title pairs...");
-    sObjectMgr->LoadFactionChangeTitles();
 
     TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading GM tickets...");
     sTicketMgr->LoadTickets();

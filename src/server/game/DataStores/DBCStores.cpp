@@ -66,27 +66,27 @@ DBCStorage <CharTitlesEntry> sCharTitlesStore(CharTitlesEntryfmt);
 DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
-// 2.4.3? DBCStorage <CinematicSequencesEntry> sCinematicSequencesStore(CinematicSequencesEntryfmt);
+DBCStorage <CinematicSequencesEntry> sCinematicSequencesStore(CinematicSequencesEntryfmt);
 DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStore(CreatureDisplayInfofmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 DBCStorage <CreatureModelDataEntry> sCreatureModelDataStore(CreatureModelDatafmt);
 DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt);
-// 2.4.3? DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
+DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
 // 2.4.3? DBCStorage <CurrencyTypesEntry> sCurrencyTypesStore(CurrencyTypesfmt);
 
 // 2.4.3? DBCStorage <DungeonEncounterEntry> sDungeonEncounterStore(DungeonEncounterfmt);
 DBCStorage <DurabilityQualityEntry> sDurabilityQualityStore(DurabilityQualityfmt);
 DBCStorage <DurabilityCostsEntry> sDurabilityCostsStore(DurabilityCostsfmt);
 
-// 2.4.3? DBCStorage <EmotesEntry> sEmotesStore(EmotesEntryfmt);
-// 2.4.3? DBCStorage <EmotesTextEntry> sEmotesTextStore(EmotesTextEntryfmt);
+DBCStorage <EmotesEntry> sEmotesStore(EmotesEntryfmt);
+DBCStorage <EmotesTextEntry> sEmotesTextStore(EmotesTextEntryfmt);
 
 typedef std::map<uint32, SimpleFactionsList> FactionTeamMap;
 static FactionTeamMap sFactionTeamMap;
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
-// 2.4.3? DBCStorage <GameObjectDisplayInfoEntry> sGameObjectDisplayInfoStore(GameObjectDisplayInfofmt);
+DBCStorage <GameObjectDisplayInfoEntry> sGameObjectDisplayInfoStore(GameObjectDisplayInfofmt);
 DBCStorage <GemPropertiesEntry> sGemPropertiesStore(GemPropertiesEntryfmt);
 
 DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore(GtCombatRatingsfmt);
@@ -281,16 +281,16 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sChatChannelsStore,           dbcPath, "ChatChannels.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrClassesStore,             dbcPath, "ChrClasses.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrRacesStore,               dbcPath, "ChrRaces.dbc");
-// 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sCinematicSequencesStore,     dbcPath, "CinematicSequences.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sCinematicSequencesStore,     dbcPath, "CinematicSequences.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureDisplayInfoStore,    dbcPath, "CreatureDisplayInfo.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureFamilyStore,         dbcPath, "CreatureFamily.dbc");
 // 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureModelDataStore,      dbcPath, "CreatureModelData.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureSpellDataStore,      dbcPath, "CreatureSpellData.dbc");
-// 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureTypeStore,           dbcPath, "CreatureType.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sCreatureTypeStore,           dbcPath, "CreatureType.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sDurabilityCostsStore,        dbcPath, "DurabilityCosts.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sDurabilityQualityStore,      dbcPath, "DurabilityQuality.dbc");
-// 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sEmotesStore,                 dbcPath, "Emotes.dbc");
-// 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sEmotesTextStore,             dbcPath, "EmotesText.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sEmotesStore,                 dbcPath, "Emotes.dbc");
+    LoadDBC(availableDbcLocales, bad_dbc_files, sEmotesTextStore,             dbcPath, "EmotesText.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sFactionStore,                dbcPath, "Faction.dbc");
     for (uint32 i=0; i<sFactionStore.GetNumRows(); ++i)
     {
@@ -303,8 +303,8 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sFactionTemplateStore,        dbcPath, "FactionTemplate.dbc");
-// 2.4.3?    LoadDBC(availableDbcLocales, bad_dbc_files, sGameObjectDisplayInfoStore,  dbcPath, "GameObjectDisplayInfo.dbc");
-/*    for (uint32 i = 0; i < sGameObjectDisplayInfoStore.GetNumRows(); ++i)
+    LoadDBC(availableDbcLocales, bad_dbc_files, sGameObjectDisplayInfoStore,  dbcPath, "GameObjectDisplayInfo.dbc");
+    for (uint32 i = 0; i < sGameObjectDisplayInfoStore.GetNumRows(); ++i)
     {
         if (GameObjectDisplayInfoEntry const* info = sGameObjectDisplayInfoStore.LookupEntry(i))
         {
@@ -316,7 +316,6 @@ void LoadDBCStores(const std::string& dataPath)
                 std::swap(*(float*)(&info->maxZ), *(float*)(&info->minZ));
         }
     }
-*/
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtCombatRatingsStore,        dbcPath, "gtCombatRatings.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtChanceToMeleeCritBaseStore, dbcPath, "gtChanceToMeleeCritBase.dbc");

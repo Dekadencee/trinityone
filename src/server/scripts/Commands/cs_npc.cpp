@@ -267,7 +267,7 @@ public:
         }
 
         Creature* creature = new Creature();
-        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
+        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, (uint32)teamval, x, y, z, o))
         {
             delete creature;
             return false;

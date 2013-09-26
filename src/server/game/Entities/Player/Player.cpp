@@ -1048,7 +1048,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     // base stats and related field values
     InitStatsForLevel();
     InitTaxiNodesForLevel();
-    InitGlyphsForLevel();
     InitTalentForLevel();
     InitPrimaryProfessions();                               // to max set before any spell added
 
@@ -2984,7 +2983,6 @@ void Player::GiveLevel(uint8 level)
 
     InitTalentForLevel();
     InitTaxiNodesForLevel();
-    InitGlyphsForLevel();
 
     UpdateAllStats();
 
@@ -5707,27 +5705,6 @@ float Player::GetSpellCritFromIntellect()
     return crit*100.0f;
 }
 
-float Player::GetRatingMultiplier(CombatRating cr) const
-{
-    uint8 level = getLevel();
-
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-    GtCombatRatingsEntry const* Rating = sGtCombatRatingsStore.LookupEntry(cr*GT_MAX_LEVEL+level-1);
-    // gtOCTClassCombatRatingScalarStore.dbc starts with 1, CombatRating with zero, so cr+1
-    GtOCTClassCombatRatingScalarEntry const* classRating = sGtOCTClassCombatRatingScalarStore.LookupEntry((getClass()-1)*GT_MAX_RATING+cr+1);
-    if (!Rating || !classRating)
-        return 1.0f;                                        // By default use minimum coefficient (not must be called)
-
-    return classRating->ratio / Rating->ratio;
-}
-
-float Player::GetRatingBonusValue(CombatRating cr) const
-{
-    return float(GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr)) * GetRatingMultiplier(cr);
-}
-
 float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
 {
     switch (attType)
@@ -5782,131 +5759,6 @@ float Player::OCTRegenMPPerSpirit()
     float spirit    = GetStat(STAT_SPIRIT);
     float regen     = spirit * moreRatio->ratio;
     return regen;
-}
-
-void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
-{
-    m_baseRatingValue[cr]+=(apply ? value : -value);
-
-    // explicit affected values
-    switch (cr)
-    {
-        case CR_HASTE_MELEE:
-        {
-            float RatingChange = value * GetRatingMultiplier(cr);
-            ApplyAttackTimePercentMod(BASE_ATTACK, RatingChange, apply);
-            ApplyAttackTimePercentMod(OFF_ATTACK, RatingChange, apply);
-            break;
-        }
-        case CR_HASTE_RANGED:
-        {
-            float RatingChange = value * GetRatingMultiplier(cr);
-            ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
-            break;
-        }
-        case CR_HASTE_SPELL:
-        {
-            float RatingChange = value * GetRatingMultiplier(cr);
-            ApplyCastTimePercentMod(RatingChange, apply);
-            break;
-        }
-        default:
-            break;
-    }
-
-    UpdateRating(cr);
-}
-
-void Player::UpdateRating(CombatRating cr)
-{
-    int32 amount = m_baseRatingValue[cr];
-    // Apply bonus from SPELL_AURA_MOD_RATING_FROM_STAT
-    // stat used stored in miscValueB for this aura
-    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if ((*i)->GetMiscValue() & (1<<cr))
-            amount += int32(CalculatePct(GetStat(Stats((*i)->GetMiscValueB())), (*i)->GetAmount()));
-    if (amount < 0)
-        amount = 0;
-    SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr, uint32(amount));
-
-    bool affectStats = CanModifyStats();
-
-    switch (cr)
-    {
-        case CR_WEAPON_SKILL:                               // Implemented in Unit::RollMeleeOutcomeAgainst
-        case CR_DEFENSE_SKILL:
-            UpdateDefenseBonusesMod();
-            break;
-        case CR_DODGE:
-            UpdateDodgePercentage();
-            break;
-        case CR_PARRY:
-            UpdateParryPercentage();
-            break;
-        case CR_BLOCK:
-            UpdateBlockPercentage();
-            break;
-        case CR_HIT_MELEE:
-            UpdateMeleeHitChances();
-            break;
-        case CR_HIT_RANGED:
-            UpdateRangedHitChances();
-            break;
-        case CR_HIT_SPELL:
-            UpdateSpellHitChances();
-            break;
-        case CR_CRIT_MELEE:
-            if (affectStats)
-            {
-                UpdateCritPercentage(BASE_ATTACK);
-                UpdateCritPercentage(OFF_ATTACK);
-            }
-            break;
-        case CR_CRIT_RANGED:
-            if (affectStats)
-                UpdateCritPercentage(RANGED_ATTACK);
-            break;
-        case CR_CRIT_SPELL:
-            if (affectStats)
-                UpdateAllSpellCritChances();
-            break;
-        case CR_HIT_TAKEN_MELEE:                            // Implemented in Unit::MeleeMissChanceCalc
-        case CR_HIT_TAKEN_RANGED:
-            break;
-        case CR_HIT_TAKEN_SPELL:                            // Implemented in Unit::MagicSpellHitResult
-            break;
-        case CR_CRIT_TAKEN_MELEE:                           // Implemented in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
-        case CR_CRIT_TAKEN_RANGED:
-            break;
-        case CR_CRIT_TAKEN_SPELL:                           // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
-            break;
-        case CR_HASTE_MELEE:                                // Implemented in Player::ApplyRatingMod
-        case CR_HASTE_RANGED:
-        case CR_HASTE_SPELL:
-            break;
-        case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
-        case CR_WEAPON_SKILL_OFFHAND:
-        case CR_WEAPON_SKILL_RANGED:
-            break;
-        case CR_EXPERTISE:
-            if (affectStats)
-            {
-                UpdateExpertise(BASE_ATTACK);
-                UpdateExpertise(OFF_ATTACK);
-            }
-            break;
-        case CR_ARMOR_PENETRATION:
-            if (affectStats)
-                UpdateArmorPenetration(amount);
-            break;
-    }
-}
-
-void Player::UpdateAllRatings()
-{
-    for (int cr = 0; cr < MAX_COMBAT_RATING; ++cr)
-        UpdateRating(CombatRating(cr));
 }
 
 void Player::SetRegularAttackTime()
@@ -6865,26 +6717,14 @@ void Player::RewardReputation(Unit* victim, float rate)
     if (!Rep)
         return;
 
-    uint32 ChampioningFaction = 0;
-
-    if (GetChampioningFaction())
-    {
-        // support for: Championing - http://www.wowwiki.com/Championing
-        Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
-            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80)
-                    ChampioningFaction = GetChampioningFaction();
-    }
-
     uint32 team = GetTeam();
 
     if (Rep->RepFaction1 && (!Rep->TeamDependent || team == ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue1, ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue1, Rep->RepFaction1);
         donerep1 = int32(donerep1 * rate);
 
-        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
+        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(Rep->RepFaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1 && current_reputation_rank1 <= Rep->ReputationMaxCap1)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
@@ -6892,10 +6732,10 @@ void Player::RewardReputation(Unit* victim, float rate)
 
     if (Rep->RepFaction2 && (!Rep->TeamDependent || team == HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue2, ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue2, Rep->RepFaction2);
         donerep2 = int32(donerep2 * rate);
 
-        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
+        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(Rep->RepFaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
         if (factionEntry2 && current_reputation_rank2 <= Rep->ReputationMaxCap2)
             GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
@@ -7622,38 +7462,15 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     if (slot >= INVENTORY_SLOT_BAG_END || !proto)
         return;
 
-    ScalingStatDistributionEntry const* ssd = proto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(proto->ScalingStatDistribution) : NULL;
-    if (only_level_scale && !ssd)
-        return;
-
-    // req. check at equip, but allow use for extended range if range limit max level, set proper level
-    uint32 ssd_level = getLevel();
-    if (ssd && ssd_level > ssd->MaxLevel)
-        ssd_level = ssd->MaxLevel;
-
-    ScalingStatValuesEntry const* ssv = proto->ScalingStatValue ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
-    if (only_level_scale && !ssv)
-        return;
-
     for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
     {
         uint32 statType = 0;
         int32  val = 0;
-        // If set ScalingStatDistribution need get stats and values from it
-        if (ssd && ssv)
-        {
-            if (ssd->StatMod[i] < 0)
-                continue;
-            statType = ssd->StatMod[i];
-            val = (ssv->getssdMultiplier(proto->ScalingStatValue) * ssd->Modifier[i]) / 10000;
-        }
-        else
-        {
+
             if (i >= proto->StatsCount)
                 continue;
             statType = proto->ItemStat[i].ItemStatType;
             val = proto->ItemStat[i].ItemStatValue;
-        }
 
         if (val == 0)
             continue;
@@ -7686,96 +7503,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
                 ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
                 break;
-            case ITEM_MOD_DEFENSE_SKILL_RATING:
-                ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
-                break;
-            case ITEM_MOD_DODGE_RATING:
-                ApplyRatingMod(CR_DODGE, int32(val), apply);
-                break;
-            case ITEM_MOD_PARRY_RATING:
-                ApplyRatingMod(CR_PARRY, int32(val), apply);
-                break;
-            case ITEM_MOD_BLOCK_RATING:
-                ApplyRatingMod(CR_BLOCK, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_MELEE_RATING:
-                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_RANGED_RATING:
-                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_SPELL_RATING:
-                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_MELEE_RATING:
-                ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_RANGED_RATING:
-                ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_SPELL_RATING:
-                ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-                ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-                ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-                ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_HASTE_MELEE_RATING:
-                ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_HASTE_RANGED_RATING:
-                ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_HASTE_SPELL_RATING:
-                ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_RATING:
-                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_RATING:
-                ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_TAKEN_RATING:
-                ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_CRIT_TAKEN_RATING:
-                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_RESILIENCE_RATING:
-                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_HASTE_RATING:
-                ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_EXPERTISE_RATING:
-                ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
-                break;
             case ITEM_MOD_ATTACK_POWER:
                 HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(val), apply);
                 HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
@@ -7786,12 +7513,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
 //            case ITEM_MOD_FERAL_ATTACK_POWER:
 //                ApplyFeralAPBonus(int32(val), apply);
 //                break;
-            case ITEM_MOD_MANA_REGENERATION:
-                ApplyManaRegenBonus(int32(val), apply);
-                break;
-            case ITEM_MOD_ARMOR_PENETRATION_RATING:
-                ApplyRatingMod(CR_ARMOR_PENETRATION, int32(val), apply);
-                break;
             case ITEM_MOD_SPELL_POWER:
                 ApplySpellPowerBonus(int32(val), apply);
                 break;
@@ -7809,40 +7530,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_SPELL_DAMAGE_DONE:
                 break;
         }
-    }
-
-    // Apply Spell Power from ScalingStatValue if set
-    if (ssv)
-        if (int32 spellbonus = ssv->getSpellBonus(proto->ScalingStatValue))
-            ApplySpellPowerBonus(spellbonus, apply);
-
-    // If set ScalingStatValue armor get it or use item armor
-    uint32 armor = proto->Armor;
-    if (ssv)
-    {
-        if (uint32 ssvarmor = ssv->getArmorMod(proto->ScalingStatValue))
-            armor = ssvarmor;
-    }
-    else if (armor && proto->ArmorDamageModifier)
-        armor -= uint32(proto->ArmorDamageModifier);
-
-    if (armor)
-    {
-        UnitModifierType modType = TOTAL_VALUE;
-        if (proto->Class == ITEM_CLASS_ARMOR)
-        {
-            switch (proto->SubClass)
-            {
-                case ITEM_SUBCLASS_ARMOR_CLOTH:
-                case ITEM_SUBCLASS_ARMOR_LEATHER:
-                case ITEM_SUBCLASS_ARMOR_MAIL:
-                case ITEM_SUBCLASS_ARMOR_PLATE:
-                case ITEM_SUBCLASS_ARMOR_SHIELD:
-                    modType = BASE_VALUE;
-                break;
-            }
-        }
-        HandleStatModifier(UNIT_MOD_ARMOR, modType, float(armor), apply);
     }
 
     // Add armor bonus from ArmorDamageModifier if > 0
@@ -7884,19 +7571,14 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     }
 
     if (CanUseAttackType(attType))
-        _ApplyWeaponDamage(slot, proto, ssv, apply);
+        _ApplyWeaponDamage(slot, proto, apply);
 
 
-    // Druids get feral AP bonus from weapon dps (also use DPS from ScalingStatValue)
+    // Druids get feral AP bonus from weapon dps
     if (getClass() == CLASS_DRUID)
     {
         int32 dpsMod = 0;
         int32 feral_bonus = 0;
-        if (ssv)
-        {
-            dpsMod = ssv->getDPSMod(proto->ScalingStatValue);
-            feral_bonus += ssv->getFeralBonus(proto->ScalingStatValue);
-        }
 
         feral_bonus += proto->getFeralBonus(dpsMod);
         if (feral_bonus)
@@ -7904,7 +7586,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     }
 }
 
-void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingStatValuesEntry const* ssv, bool apply)
+void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, bool apply)
 {
     WeaponAttackType attType = BASE_ATTACK;
     float damage = 0.0f;
@@ -7922,18 +7604,6 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
 
     float minDamage = proto->Damage[0].DamageMin;
     float maxDamage = proto->Damage[0].DamageMax;
-
-    // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
-    if (ssv)
-    {
-        int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
-        if (extraDPS)
-        {
-            float average = extraDPS * proto->Delay / 1000.0f;
-            minDamage = 0.7f * average;
-            maxDamage = 1.3f * average;
-        }
-    }
 
     if (minDamage > 0)
     {
@@ -11223,10 +10893,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
 
-            ScalingStatDistributionEntry const* ssd = pProto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(pProto->ScalingStatDistribution) : 0;
             // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
-            if (ssd && ssd->MaxLevel < DEFAULT_MAX_LEVEL && ssd->MaxLevel < getLevel())
-                return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
             uint8 eslot = FindEquipSlot(pProto, slot, swap);
             if (eslot == NULL_SLOT)
@@ -11823,23 +11490,6 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
             pItem->SetItemRandomProperties(randomPropertyId);
         pItem = StoreItem(dest, pItem, update);
 
-        if (allowedLooters.size() > 1 && pItem->GetTemplate()->GetMaxStackSize() == 1 && pItem->IsSoulBound())
-        {
-            pItem->SetSoulboundTradeable(allowedLooters);
-            AddTradeableItem(pItem);
-
-            // save data
-            std::ostringstream ss;
-            AllowedLooterSet::const_iterator itr = allowedLooters.begin();
-            ss << *itr;
-            for (++itr; itr != allowedLooters.end(); ++itr)
-                ss << ' ' << *itr;
-
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ITEM_BOP_TRADE);
-            stmt->setUInt32(0, pItem->GetGUIDLow());
-            stmt->setString(1, ss.str());
-            CharacterDatabase.Execute(stmt);
-        }
     }
     return pItem;
 }
@@ -11960,9 +11610,6 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
             RemoveItemDurations(pItem);
 
             pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
-            pItem->SetNotRefundable(this);
-            pItem->ClearSoulboundTradeable(this);
-            RemoveTradeableItem(pItem);
             pItem->SetState(ITEM_REMOVED, this);
         }
 
@@ -12083,9 +11730,6 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         RemoveItemDurations(pItem);
 
         pItem->SetOwnerGUID(GetGUID());                     // prevent error at next SetState in case trade/mail/buy from vendor
-        pItem->SetNotRefundable(this);
-        pItem->ClearSoulboundTradeable(this);
-        RemoveTradeableItem(pItem);
         pItem->SetState(ITEM_REMOVED, this);
         pItem2->SetState(ITEM_CHANGED, this);
 
@@ -12249,7 +11893,6 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
     {
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
-        it->SetNotRefundable(this, false);
         it->RemoveFromUpdateQueueOf(this);
         if (it->IsInWorld())
         {
@@ -12306,10 +11949,6 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 
         RemoveEnchantmentDurations(pItem);
         RemoveItemDurations(pItem);
-
-        pItem->SetNotRefundable(this);
-        pItem->ClearSoulboundTradeable(this);
-        RemoveTradeableItem(pItem);
 
         const ItemTemplate* proto = pItem->GetTemplate();
         for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -12976,7 +12615,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
                     pDstItem->SendUpdateToPlayer(this);
                 }
             }
-            SendRefundInfo(pDstItem);
             return;
         }
     }
@@ -13341,40 +12979,6 @@ void Player::TradeCancel(bool sendback)
     }
 }
 
-void Player::UpdateSoulboundTradeItems()
-{
-    if (m_itemSoulboundTradeable.empty())
-        return;
-
-    // also checks for garbage data
-    for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
-    {
-        ASSERT(*itr);
-        if ((*itr)->GetOwnerGUID() != GetGUID())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        if ((*itr)->CheckSoulboundTradeExpire())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        ++itr;
-    }
-}
-
-void Player::AddTradeableItem(Item* item)
-{
-    m_itemSoulboundTradeable.push_back(item);
-}
-
-/// @todo should never allow an item to be added to m_itemSoulboundTradeable twice
-void Player::RemoveTradeableItem(Item* item)
-{
-    m_itemSoulboundTradeable.remove(item);
-}
-
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
 {
     if (m_itemDuration.empty())
@@ -13685,114 +13289,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_STAMINA, (float)enchant_amount, apply);
                             break;
-                        case ITEM_MOD_DEFENSE_SKILL_RATING:
-                            ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u DEFENCE", enchant_amount);
-                            break;
-                        case  ITEM_MOD_DODGE_RATING:
-                            ApplyRatingMod(CR_DODGE, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u DODGE", enchant_amount);
-                            break;
-                        case ITEM_MOD_PARRY_RATING:
-                            ApplyRatingMod(CR_PARRY, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u PARRY", enchant_amount);
-                            break;
-                        case ITEM_MOD_BLOCK_RATING:
-                            ApplyRatingMod(CR_BLOCK, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u SHIELD_BLOCK", enchant_amount);
-                            break;
-                        case ITEM_MOD_HIT_MELEE_RATING:
-                            ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u MELEE_HIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_HIT_RANGED_RATING:
-                            ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u RANGED_HIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_HIT_SPELL_RATING:
-                            ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u SPELL_HIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_CRIT_MELEE_RATING:
-                            ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u MELEE_CRIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_CRIT_RANGED_RATING:
-                            ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u RANGED_CRIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_CRIT_SPELL_RATING:
-                            ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u SPELL_CRIT", enchant_amount);
-                            break;
-//                        Values from ITEM_STAT_MELEE_HA_RATING to ITEM_MOD_HASTE_RANGED_RATING are never used
-//                        in Enchantments
-//                        case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-//                            ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-//                            ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-//                            ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-//                            ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-//                            ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-//                            ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_HASTE_MELEE_RATING:
-//                            ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_HASTE_RANGED_RATING:
-//                            ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
-//                            break;
-                        case ITEM_MOD_HASTE_SPELL_RATING:
-                            ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
-                            break;
-                        case ITEM_MOD_HIT_RATING:
-                            ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
-                            ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
-                            ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u HIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_CRIT_RATING:
-                            ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u CRITICAL", enchant_amount);
-                            break;
-//                        Values ITEM_MOD_HIT_TAKEN_RATING and ITEM_MOD_CRIT_TAKEN_RATING are never used in Enchantment
-//                        case ITEM_MOD_HIT_TAKEN_RATING:
-//                            ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
-//                            ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
-//                            ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
-//                            break;
-//                        case ITEM_MOD_CRIT_TAKEN_RATING:
-//                            ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
-//                            ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
-//                            ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
-//                            break;
-                        case ITEM_MOD_RESILIENCE_RATING:
-                            ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u RESILIENCE", enchant_amount);
-                            break;
-                        case ITEM_MOD_HASTE_RATING:
-                            ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
-                            ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
-                            ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u HASTE", enchant_amount);
-                            break;
-                        case ITEM_MOD_EXPERTISE_RATING:
-                            ApplyRatingMod(CR_EXPERTISE, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u EXPERTISE", enchant_amount);
-                            break;
                         case ITEM_MOD_ATTACK_POWER:
                             HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(enchant_amount), apply);
                             HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
@@ -13809,10 +13305,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_MANA_REGENERATION:
                             ApplyManaRegenBonus(enchant_amount, apply);
                             TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u MANA_REGENERATION", enchant_amount);
-                            break;
-                        case ITEM_MOD_ARMOR_PENETRATION_RATING:
-                            ApplyRatingMod(CR_ARMOR_PENETRATION, enchant_amount, apply);
-                            TC_LOG_DEBUG(LOG_FILTER_PLAYER_ITEMS, "+ %u ARMOR PENETRATION", enchant_amount);
                             break;
                         case ITEM_MOD_SPELL_POWER:
                             ApplySpellPowerBonus(enchant_amount, apply);
@@ -14904,7 +14396,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     bool rewarded = (m_RewardedQuests.find(quest_id) != m_RewardedQuests.end());
 
     // Not give XP in case already completed once repeatable quest
-    uint32 XP = rewarded ? 0 : uint32(quest->XPValue(this)*sWorld->getRate(RATE_XP_QUEST));
+    // This should be fixed when quest XP is rewritten
+//    uint32 XP = rewarded ? 0 : uint32(quest->XPValue(this)*sWorld->getRate(RATE_XP_QUEST));
+    uint32 XP = rewarded;
 
     // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
     Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(SPELL_AURA_MOD_XP_QUEST_PCT);
@@ -17531,80 +17025,6 @@ Item* Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, F
                 TC_LOG_DEBUG(LOG_FILTER_PLAYER_LOADING, "Player::_LoadInventory: player (GUID: %u, name: '%s', diff: %u) has conjured item (GUID: %u, entry: %u) with expired lifetime (15 minutes). Deleting item.",
                     GetGUIDLow(), GetName().c_str(), timeDiff, item->GetGUIDLow(), item->GetEntry());
                 remove = true;
-            }
-            else if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
-            {
-                if (item->GetPlayedTime() > (2 * HOUR))
-                {
-                    TC_LOG_DEBUG(LOG_FILTER_PLAYER_LOADING, "Player::_LoadInventory: player (GUID: %u, name: '%s') has item (GUID: %u, entry: %u) with expired refund time (%u). Deleting refund data and removing refundable flag.",
-                        GetGUIDLow(), GetName().c_str(), item->GetGUIDLow(), item->GetEntry(), item->GetPlayedTime());
-
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
-                    stmt->setUInt32(0, item->GetGUIDLow());
-                    trans->Append(stmt);
-
-                    item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE);
-                }
-                else
-                {
-                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ITEM_REFUNDS);
-                    stmt->setUInt32(0, item->GetGUIDLow());
-                    stmt->setUInt32(1, GetGUIDLow());
-                    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-                    {
-                        item->SetRefundRecipient((*result)[0].GetUInt32());
-                        item->SetPaidMoney((*result)[1].GetUInt32());
-                        item->SetPaidExtendedCost((*result)[2].GetUInt16());
-                        AddRefundReference(item->GetGUIDLow());
-                    }
-                    else
-                    {
-                        TC_LOG_DEBUG(LOG_FILTER_PLAYER_LOADING, "Player::_LoadInventory: player (GUID: %u, name: '%s') has item (GUID: %u, entry: %u) with refundable flags, but without data in item_refund_instance. Removing flag.",
-                            GetGUIDLow(), GetName().c_str(), item->GetGUIDLow(), item->GetEntry());
-                        item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE);
-                    }
-                }
-            }
-            else if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
-            {
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ITEM_BOP_TRADE);
-                stmt->setUInt32(0, item->GetGUIDLow());
-                if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-                {
-                    std::string strGUID = (*result)[0].GetString();
-                    Tokenizer GUIDlist(strGUID, ' ');
-                    AllowedLooterSet looters;
-                    for (Tokenizer::const_iterator itr = GUIDlist.begin(); itr != GUIDlist.end(); ++itr)
-                        looters.insert(atol(*itr));
-
-                    if (looters.size() > 1 && item->GetTemplate()->GetMaxStackSize() == 1 && item->IsSoulBound())
-                    {
-                        item->SetSoulboundTradeable(looters);
-                        AddTradeableItem(item);
-                    }
-                    else
-                        item->ClearSoulboundTradeable(this);
-                }
-                else
-                {
-                    TC_LOG_DEBUG(LOG_FILTER_PLAYER_LOADING, "Player::_LoadInventory: player (GUID: %u, name: '%s') has item (GUID: %u, entry: %u) with ITEM_FLAG_BOP_TRADEABLE flag, but without data in item_soulbound_trade_data. Removing flag.",
-                        GetGUIDLow(), GetName().c_str(), item->GetGUIDLow(), item->GetEntry());
-                    item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
-                }
-            }
-            else if (proto->HolidayId)
-            {
-                remove = true;
-                GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
-                GameEventMgr::ActiveEvents const& activeEventsList = sGameEventMgr->GetActiveEventList();
-                for (GameEventMgr::ActiveEvents::const_iterator itr = activeEventsList.begin(); itr != activeEventsList.end(); ++itr)
-                {
-                    if (uint32(events[*itr].holiday_id) == proto->HolidayId)
-                    {
-                        remove = false;
-                        break;
-                    }
-                }
             }
         }
         else
@@ -20847,15 +20267,6 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         if (!bStore)
             AutoUnequipOffhandIfNeed();
 
-        if (pProto->Flags & ITEM_PROTO_FLAG_REFUNDABLE && crItem->ExtendedCost && pProto->GetMaxStackSize() == 1)
-        {
-            it->SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE);
-            it->SetRefundRecipient(GetGUIDLow());
-            it->SetPaidMoney(price);
-            it->SetPaidExtendedCost(crItem->ExtendedCost);
-            it->SaveRefundDataToDB();
-            AddRefundReference(it->GetGUIDLow());
-        }
     }
     return true;
 }
@@ -24807,11 +24218,6 @@ void Player::SendDuelCountdown(uint32 counter)
     WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
     data << uint32(counter);                                // seconds
     GetSession()->SendPacket(&data);
-}
-
-void Player::AddRefundReference(uint32 it)
-{
-    m_refundableItems.insert(it);
 }
 
 bool Player::AddItem(uint32 itemId, uint32 count)

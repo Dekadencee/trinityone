@@ -565,7 +565,6 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
     //Auto Shot & Shoot (wand)
     m_autoRepeat = m_spellInfo->IsAutoRepeatRangedSpell();
 
-    m_runesState = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, must not be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, must not be used before.
     m_timer = 0;                                            // will set to castime in prepare
@@ -1249,10 +1248,6 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     case 71610: // Echoes of Light (Althor's Abacus normal version)
                     case 71641: // Echoes of Light (Althor's Abacus heroic version)
                         maxSize = 1;
-                        power = POWER_HEALTH;
-                        break;
-                    case 54968: // Glyph of Holy Light
-                        maxSize = m_spellInfo->MaxAffectedTargets;
                         power = POWER_HEALTH;
                         break;
                     case 57669: // Replenishment
@@ -3918,28 +3913,6 @@ void Spell::SendSpellGo()
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
         data << uint32(m_caster->GetPower((Powers)m_spellInfo->PowerType));
 
-    if (castFlags & CAST_FLAG_RUNE_LIST)                   // rune cooldowns list
-    {
-        /// @todo There is a crash caused by a spell with CAST_FLAG_RUNE_LIST casted by a creature
-        //The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
-        if (Player* player = m_caster->ToPlayer())
-        {
-            uint8 runeMaskInitial = m_runesState;
-            uint8 runeMaskAfterCast = player->GetRunesState();
-            data << uint8(runeMaskInitial);                     // runes state before
-            data << uint8(runeMaskAfterCast);                   // runes state after
-            for (uint8 i = 0; i < MAX_RUNES; ++i)
-            {
-                uint8 mask = (1 << i);
-                if (mask & runeMaskInitial && !(mask & runeMaskAfterCast))  // usable before andon cooldown now...
-                {
-                    // float casts ensure the division is performed on floats as we need float result
-                    float baseCd = float(player->GetRuneBaseCooldown(i));
-                    data << uint8((baseCd - float(player->GetRuneCooldown(i))) / baseCd * 255); // rune cooldown passed
-                }
-            }
-        }
-    }
     if (castFlags & CAST_FLAG_ADJUST_MISSILE)
     {
         data << m_targets.GetElevation();
@@ -4917,14 +4890,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
-            case SPELL_EFFECT_APPLY_GLYPH:
-            {
-                uint32 glyphId = m_spellInfo->Effects[i].MiscValue;
-                if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyphId))
-                    if (m_caster->HasAura(gp->SpellId))
-                        return SPELL_FAILED_UNIQUE_GLYPH;
-                break;
-            }
             case SPELL_EFFECT_FEED_PET:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -5428,11 +5393,6 @@ SpellCastResult Spell::CheckCasterAuras() const
     }
 
     bool usableInStun = m_spellInfo->AttributesEx5 & SPELL_ATTR5_USABLE_WHILE_STUNNED;
-
-    // Glyph of Pain Suppression
-    // there is no other way to handle it
-    if (m_spellInfo->Id == 33206 && !m_caster->HasAura(63248))
-        usableInStun = false;
 
     // Check whether the cast should be prevented by any state you might have.
     SpellCastResult prevented_reason = SPELL_CAST_OK;

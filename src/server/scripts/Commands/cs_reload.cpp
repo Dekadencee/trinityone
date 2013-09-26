@@ -29,7 +29,6 @@ EndScriptData */
 #include "CreatureTextMgr.h"
 #include "DisableMgr.h"
 #include "Language.h"
-#include "LFGMgr.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
@@ -101,7 +100,6 @@ public:
             { "item_enchantment_template",     RBAC_PERM_COMMANDS_RELOAD_ITEM_ENCHANTMENT_TEMPLATE, true,  &HandleReloadItemEnchantementsCommand,          "", NULL },
             { "item_loot_template",            RBAC_PERM_COMMANDS_RELOAD_ITEM_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesItemCommand,          "", NULL },
             { "item_set_names",                RBAC_PERM_COMMANDS_RELOAD_ITEM_SET_NAMES, true,  &HandleReloadItemSetNamesCommand,               "", NULL },
-            { "lfg_dungeon_rewards",           RBAC_PERM_COMMANDS_RELOAD_LFG_DUNGEON_REWARDS, true,  &HandleReloadLfgRewardsCommand,                 "", NULL },
             { "locales_creature",              RBAC_PERM_COMMANDS_RELOAD_LOCALES_CRETURE, true,  &HandleReloadLocalesCreatureCommand,            "", NULL },
             { "locales_creature_text",         RBAC_PERM_COMMANDS_RELOAD_LOCALES_CRETURE_TEXT, true,  &HandleReloadLocalesCreatureTextCommand,        "", NULL },
             { "locales_gameobject",            RBAC_PERM_COMMANDS_RELOAD_LOCALES_GAMEOBJECT, true,  &HandleReloadLocalesGameobjectCommand,          "", NULL },
@@ -152,8 +150,6 @@ public:
             { "warden_action",                 RBAC_PERM_COMMANDS_RELOAD_WARDEN_ACTION, true,  &HandleReloadWardenactionCommand,               "", NULL },
             { "waypoint_scripts",              RBAC_PERM_COMMANDS_RELOAD_WAYPOINT_SCRIPTS, true,  &HandleReloadWpScriptsCommand,                  "", NULL },
             { "waypoint_data",                 RBAC_PERM_COMMANDS_RELOAD_WAYPOINT_DATA, true,  &HandleReloadWpCommand,                         "", NULL },
-            { "vehicle_accessory",             RBAC_PERM_COMMANDS_RELOAD_VEHICLE_ACCESORY, true,  &HandleReloadVehicleAccessoryCommand,           "", NULL },
-            { "vehicle_template_accessory",    RBAC_PERM_COMMANDS_RELOAD_VEHICLE_TEMPLATE_ACCESSORY, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "", NULL },
             { NULL,                            0,                          false, NULL,                                           "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -175,7 +171,6 @@ public:
     {
         HandleReloadSkillFishingBaseLevelCommand(handler, "");
 
-        HandleReloadAllAchievementCommand(handler, "");
         HandleReloadAllAreaCommand(handler, "");
         HandleReloadAllEventAICommand(handler, "");
         HandleReloadAllLootCommand(handler, "");
@@ -195,8 +190,6 @@ public:
 
         HandleReloadCreatureSummonGroupsCommand(handler, "");
 
-        HandleReloadVehicleAccessoryCommand(handler, "");
-        HandleReloadVehicleTemplateAccessoryCommand(handler, "");
 
         HandleReloadAutobroadcastCommand(handler, "");
         return true;
@@ -473,7 +466,6 @@ public:
             cInfo->spells[6]          = fields[59].GetUInt32();
             cInfo->spells[7]          = fields[60].GetUInt32();
             cInfo->PetSpellDataId     = fields[61].GetUInt32();
-            cInfo->VehicleId          = fields[62].GetUInt32();
             cInfo->mingold            = fields[63].GetUInt32();
             cInfo->maxgold            = fields[64].GetUInt32();
             cInfo->AIName             = fields[65].GetString();
@@ -1059,14 +1051,6 @@ public:
         TC_LOG_INFO(LOG_FILTER_GENERAL, "Checking quest disables...");
         DisableMgr::CheckQuestDisables();
         handler->SendGlobalGMSysMessage("DB table `disables` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadLfgRewardsCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        TC_LOG_INFO(LOG_FILTER_GENERAL, "Re-Loading lfg dungeon rewards...");
-        sLFGMgr->LoadRewards();
-        handler->SendGlobalGMSysMessage("DB table `lfg_dungeon_rewards` reloaded.");
         return true;
     }
 

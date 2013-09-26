@@ -691,7 +691,6 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     {
         // pretend the item never existed
         RemoveFromUpdateQueueOf(forplayer);
-        forplayer->DeleteRefundReference(GetGUIDLow());
         delete this;
         return;
     }
@@ -1100,54 +1099,7 @@ void Item::BuildUpdate(UpdateDataMapType& data_map)
     ClearUpdateMask(false);
 }
 
-void Item::SaveRefundDataToDB()
-{
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
-    stmt->setUInt32(0, GetGUIDLow());
-    trans->Append(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ITEM_REFUND_INSTANCE);
-    stmt->setUInt32(0, GetGUIDLow());
-    stmt->setUInt32(1, GetRefundRecipient());
-    stmt->setUInt32(2, GetPaidMoney());
-    stmt->setUInt16(3, uint16(GetPaidExtendedCost()));
-    trans->Append(stmt);
-
-    CharacterDatabase.CommitTransaction(trans);
-}
-
-void Item::DeleteRefundDataFromDB(SQLTransaction* trans)
-{
-    if (trans && !trans->null())
-    {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
-        stmt->setUInt32(0, GetGUIDLow());
-        (*trans)->Append(stmt);
-
-    }
-}
-
-void Item::SetNotRefundable(Player* owner, bool changestate /*=true*/, SQLTransaction* trans /*=NULL*/)
-{
-    if (!HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
-        return;
-
-    RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE);
-    // Following is not applicable in the trading procedure
-    if (changestate)
-        SetState(ITEM_CHANGED, owner);
-
-    SetRefundRecipient(0);
-    SetPaidMoney(0);
-    SetPaidExtendedCost(0);
-    DeleteRefundDataFromDB(trans);
-
-    owner->DeleteRefundReference(GetGUIDLow());
-}
-
-void Item::UpdatePlayedTime(Player* owner)
+void Item::UpdatePlayedTime(Player* owner) // Can we just nuke this in 2.4.3. Thinking out loud here.
 {
     /*  Here we update our played time
         We simply add a number to the current played time,
@@ -1172,8 +1124,6 @@ void Item::UpdatePlayedTime(Player* owner)
         m_lastPlayedTimeUpdate = curtime;
         return;
     }
-    // Yes
-    SetNotRefundable(owner);
 }
 
 uint32 Item::GetPlayedTime()
@@ -1182,42 +1132,6 @@ uint32 Item::GetPlayedTime()
     uint32 elapsed = uint32(curtime - m_lastPlayedTimeUpdate);
 //    return GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + elapsed; - 2.4.3?
     return curtime + elapsed;
-}
-
-bool Item::IsRefundExpired()
-{
-    return (GetPlayedTime() > 2*HOUR);
-}
-
-void Item::SetSoulboundTradeable(AllowedLooterSet const& allowedLooters)
-{
-    SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
-    allowedGUIDs = allowedLooters;
-}
-
-void Item::ClearSoulboundTradeable(Player* currentOwner)
-{
-    RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
-    if (allowedGUIDs.empty())
-        return;
-
-    allowedGUIDs.clear();
-    SetState(ITEM_CHANGED, currentOwner);
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_BOP_TRADE);
-    stmt->setUInt32(0, GetGUIDLow());
-    CharacterDatabase.Execute(stmt);
-}
-
-bool Item::CheckSoulboundTradeExpire()
-{
-    // called from owner's update - GetOwner() MUST be valid
-/*    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2*HOUR < GetOwner()->GetTotalPlayedTime())
-    {
-        ClearSoulboundTradeable(GetOwner());
-        return true; // remove from tradeable list
-    }
-*/ // 2.4.3?
-    return false;
 }
 
 void Item::ItemContainerSaveLootToDB()
