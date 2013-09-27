@@ -4067,41 +4067,6 @@ void AuraEffect::HandleRangedAmmoHaste(AuraApplication const* aurApp, uint8 mode
 }
 
 /********************************/
-/***       COMBAT RATING      ***/
-/********************************/
-
-void AuraEffect::HandleModRating(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
-        return;
-
-    Unit* target = aurApp->GetTarget();
-
-    if (target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
-        if (GetMiscValue() & (1 << rating))
-            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), GetAmount(), apply);
-}
-
-void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
-        return;
-
-    Unit* target = aurApp->GetTarget();
-
-    if (target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // Just recalculate ratings
-    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
-        if (GetMiscValue() & (1 << rating))
-            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
-}
-
-/********************************/
 /***        ATTACK POWER      ***/
 /********************************/
 

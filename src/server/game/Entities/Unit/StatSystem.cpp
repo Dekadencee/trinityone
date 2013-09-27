@@ -116,18 +116,6 @@ bool Player::UpdateStats(Stats stat)
     UpdateSpellDamageAndHealingBonus();
     UpdateManaRegen();
 
-    // Update ratings in exist SPELL_AURA_MOD_RATING_FROM_STAT and only depends from stat
-    uint32 mask = 0;
-    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if (Stats((*i)->GetMiscValueB()) == stat)
-            mask |= (*i)->GetMiscValue();
-    if (mask)
-    {
-        for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
-            if (mask & (1 << rating))
-                ApplyRatingMod(CombatRating(rating), 0, true);
-    }
     return true;
 }
 
@@ -168,7 +156,6 @@ bool Player::UpdateAllStats()
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
-    UpdateAllRatings();
     UpdateAllCritPercentages();
     UpdateAllSpellCritChances();
     UpdateDefenseBonusesMod();
@@ -177,7 +164,6 @@ bool Player::UpdateAllStats()
     UpdateManaRegen();
     UpdateExpertise(BASE_ATTACK);
     UpdateExpertise(OFF_ATTACK);
-    RecalculateRating(CR_ARMOR_PENETRATION);
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
