@@ -1,0 +1,21 @@
+﻿language: cpp
+compiler:
+  - gcc
+  - clang
+branches:
+  only:
+    - master
+git:
+  depth: 1
+before_script:
+  - sudo apt-get install libace-dev
+script:
+  - test -d _build || mkdir _build
+  - test -d _install || mkdir _install
+  - cd _build
+  - cmake -DPREFIX=../_install .. -DSCRIPTS=0
+  - make -j4
+notifications:
+  #webhooks:
+    #- http://trinityclassic.org/
+  email: false
