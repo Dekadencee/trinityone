@@ -26,7 +26,7 @@ else()
   if(GIT_EXEC)
     # Create a revision-string that we can use
     execute_process(
-      COMMAND "${GIT_EXEC}" describe --match init --dirty=+ --abbrev=12
+      COMMAND "${GIT_EXEC}" log --pretty=format:%H -n 1
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       OUTPUT_VARIABLE rev_info
       OUTPUT_STRIP_TRAILING_WHITESPACE
